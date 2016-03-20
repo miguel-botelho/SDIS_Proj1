@@ -22,10 +22,20 @@ public abstract class DataChannel extends Channel {
             DatagramPacket mpacket = new DatagramPacket(buf,buf.length);
             try {
                 this.mSocket.receive(mpacket);
-                this.handleMessage(mpacket);
+                this.handleReceivedPacket(mpacket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void sendMessage(String message) throws ChannelException, IOException {
+        if (message.getBytes().length > Server.DATA_BUF_SIZE)
+            throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
+
+        byte[] buf = message.getBytes();
+        DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
+
+        mSocket.send(datagramPacket);
     }
 }

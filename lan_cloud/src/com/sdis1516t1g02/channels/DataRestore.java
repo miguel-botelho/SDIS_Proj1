@@ -13,7 +13,7 @@ public class DataRestore extends DataChannel {
     }
 
     @Override
-    public void handleMessage(DatagramPacket mpacket) {
+    protected void handleMessage(String header, byte[] body) {
 
     }
 }

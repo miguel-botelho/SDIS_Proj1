@@ -12,8 +12,9 @@ public class DataBackup extends DataChannel{
         super(multicastAddress, mport);
     }
 
+
     @Override
-    public void handleMessage(DatagramPacket mpacket) {
+    protected void handleMessage(String header, byte[] body) {
 
     }
 }
