@@ -61,7 +61,7 @@ public abstract class Channel implements Runnable {
             }
         }
 
-        //TODO resolver questao do body header estar divido em varias linhas
+        //TODO resolver questao de como efectuar quando o header contem várias header lines
         String header = headerLines.get(0);
         int bodyLength = message.length - i;
         byte[] body = new byte[bodyLength];

@@ -12,7 +12,7 @@ import java.net.InetAddress;
  */
 public class Server {
     public final static int CHUNK_SIZE= 64*1000;
-    public final static int CONTROL_BUF_SIZE= 64;
+    public final static int CONTROL_BUF_SIZE= 256;
     public final static int DATA_BUF_SIZE= CHUNK_SIZE+CONTROL_BUF_SIZE;
 
     public final static String MC_ADDRESS = "224.0.0.128";

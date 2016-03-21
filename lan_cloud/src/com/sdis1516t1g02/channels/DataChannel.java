@@ -25,6 +25,9 @@ public abstract class DataChannel extends Channel {
                 this.handleReceivedPacket(mpacket);
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (ChannelException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         }
     }

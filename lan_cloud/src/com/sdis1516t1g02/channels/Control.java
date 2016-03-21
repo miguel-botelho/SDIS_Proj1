@@ -19,6 +19,18 @@ public class Control extends Channel {
     public void run() {
         while (true){
             byte[] buf = new byte[Server.CONTROL_BUF_SIZE];
+            DatagramPacket mpacket = new DatagramPacket(buf, buf.length);
+
+            try {
+                this.mSocket.receive(mpacket);
+                this.handleReceivedPacket(mpacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ChannelException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+
         }
     }
 
