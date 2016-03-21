@@ -9,6 +9,10 @@ public class ChannelException extends Exception {
         super(message);
     }
 
+    public ChannelException(Throwable cause) {
+        super(cause);
+    }
+
     @Override
     public String getMessage() {
         return super.getMessage();

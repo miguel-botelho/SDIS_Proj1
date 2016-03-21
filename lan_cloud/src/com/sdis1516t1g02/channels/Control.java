@@ -38,23 +38,24 @@ public class Control extends Channel {
 
 
     @Override
-    protected void handleMessage(String[] header, byte[] body)  {
-        String messageType = header[0];
+    protected void handleMessage(String header, byte[] body) throws MessageException {
+        String splitHeader[]=header.split("\\s+");
+        String messageType = splitHeader[0];
         switch (messageType){
             case "DELETE":
-                String version = header[1];
-                String fileId = header[3];
+                String version = splitHeader[1];
+                String fileId = splitHeader[3];
                 if(!isValidVersionNumber(version))
-                    return;//TODO adicionar excepção
+                    throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
                 if(!isValidFileId(fileId))
-                    return; //TODO adicionar excepção
+                    throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
 
-                String info[]= new String[header.length-1];
-                System.arraycopy(header,1,info,0,header.length-1);
-                Deletion.deleteChunk(info);
+                String info[]= new String[splitHeader.length-1];
+                System.arraycopy(splitHeader,1,info,0,splitHeader.length-1);
+                new Thread(new Deletion(info)).start();
                 break;
             default:
-                //TODO Fazer log de tipo de mensagem não reconhecida
+                throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);
         }
     }
 }

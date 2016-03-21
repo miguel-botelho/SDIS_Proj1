@@ -13,7 +13,7 @@ public class DataBackup extends DataChannel{
 
 
     @Override
-    protected void handleMessage(String[] header, byte[] body) {
+    protected void handleMessage(String header, byte[] body) {
 
     }
 }

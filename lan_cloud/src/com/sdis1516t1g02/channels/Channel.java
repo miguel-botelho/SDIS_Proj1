@@ -51,7 +51,7 @@ public abstract class Channel implements Runnable {
         ArrayList<String> headerLines = new ArrayList<>();
 
         for ( i = 0; i < message.length; i+=2) {                 //PERCORRE A MENSAGEM DE CHAR EM CHAR
-            if(i < message.length-1 && message[i] == CRLF[0] && message[i+1] == CRLF[i+1])  //FIM DA MENSAGEM
+            if(i < message.length-1 && message[i] == CRLF[0] && message[i+1] == CRLF[i+1])  //FIM DO HEADER
                 break;
             else{
                 byte[] headerLineBytes = getHeaderLineFromSegment(message, i);      //RETIRA HEADER LINE E AVANÇA PARA O PROXIMO HEADER LINE
@@ -62,11 +62,16 @@ public abstract class Channel implements Runnable {
         }
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
-        String header[] = headerLines.get(0).split("\\s+");
+        String header = headerLines.get(0);
         int bodyLength = message.length - i;
         byte[] body = new byte[bodyLength];
         System.arraycopy(message,i,body,0,bodyLength);
-        handleMessage(header,body);
+        try {
+            handleMessage(header,body);
+        } catch (MessageException e) {
+            e.printStackTrace();
+            throw new ChannelException(e);
+        }
     }
 
     public boolean isValidVersionNumber(String versionNumber){
@@ -77,7 +82,7 @@ public abstract class Channel implements Runnable {
         return fileId.length() == 64;
     }
 
-    protected abstract void handleMessage(String[] header, byte[] body);
+    protected abstract void handleMessage(String header, byte[] body) throws MessageException;
 
     private void sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
