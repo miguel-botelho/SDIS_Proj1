@@ -1,6 +1,7 @@
 package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
+import com.sdis1516t1g02.protocols.Deletion;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -34,8 +35,26 @@ public class Control extends Channel {
         }
     }
 
-    @Override
-    protected void handleMessage(String header, byte[] body) {
 
+
+    @Override
+    protected void handleMessage(String[] header, byte[] body)  {
+        String messageType = header[0];
+        switch (messageType){
+            case "DELETE":
+                String version = header[1];
+                String fileId = header[3];
+                if(!isValidVersionNumber(version))
+                    return;//TODO adicionar excepção
+                if(!isValidFileId(fileId))
+                    return; //TODO adicionar excepção
+
+                String info[]= new String[header.length-1];
+                System.arraycopy(header,1,info,0,header.length-1);
+                Deletion.deleteChunk(info);
+                break;
+            default:
+                //TODO Fazer log de tipo de mensagem não reconhecida
+        }
     }
 }

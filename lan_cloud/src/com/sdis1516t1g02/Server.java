@@ -22,6 +22,8 @@ public class Server {
     public final static String MDR_ADDRESS = "224.0.0.192";
     public final static int MDR_PORT = 4448;
 
+    public final static String VERSION = "1.0";
+
     private static Server ourInstance = new Server();
     private Control mc;
     private DataBackup mdb;

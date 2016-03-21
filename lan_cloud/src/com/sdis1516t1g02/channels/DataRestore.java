@@ -1,7 +1,6 @@
 package com.sdis1516t1g02.channels;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 
 /**
@@ -13,7 +12,7 @@ public class DataRestore extends DataChannel {
     }
 
     @Override
-    protected void handleMessage(String header, byte[] body) {
+    protected void handleMessage(String[] header, byte[] body) {
 
     }
 }

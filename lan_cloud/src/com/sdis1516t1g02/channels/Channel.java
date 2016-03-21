@@ -62,13 +62,22 @@ public abstract class Channel implements Runnable {
         }
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
-        String header = headerLines.get(0);
+        String header[] = headerLines.get(0).split("\\s+");
         int bodyLength = message.length - i;
         byte[] body = new byte[bodyLength];
         System.arraycopy(message,i,body,0,bodyLength);
         handleMessage(header,body);
     }
-    protected abstract void handleMessage(String header, byte[] body);
+
+    public boolean isValidVersionNumber(String versionNumber){
+        return versionNumber.matches("\\d\\.\\d");
+    }
+
+    public boolean isValidFileId(String fileId){
+        return fileId.length() == 64;
+    }
+
+    protected abstract void handleMessage(String[] header, byte[] body);
 
     private void sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
