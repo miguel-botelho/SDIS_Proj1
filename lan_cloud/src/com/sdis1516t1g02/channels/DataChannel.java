@@ -14,16 +14,18 @@ public abstract class DataChannel extends Channel {
         super(multicastAddress,mport);
     }
     @Override
-    public void run() {
+    public synchronized void run() {
 
-        while (true){
+        while (true) {
             byte[] buf = new byte[Server.DATA_BUF_SIZE];
 
-            DatagramPacket mpacket = new DatagramPacket(buf,buf.length);
+            DatagramPacket mpacket = new DatagramPacket(buf, buf.length);
             try {
                 this.mSocket.receive(mpacket);
                 this.handleReceivedPacket(mpacket);
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ChannelException e) {
                 e.printStackTrace();
             }
         }

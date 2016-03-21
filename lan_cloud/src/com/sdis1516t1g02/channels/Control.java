@@ -16,8 +16,9 @@ public class Control extends Channel {
     }
 
     @Override
-    public void run() {
-        while (true){
+    public synchronized void run() {
+
+        while (true) {
             byte[] buf = new byte[Server.CONTROL_BUF_SIZE];
         }
     }
