@@ -2,9 +2,7 @@ package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -15,8 +13,6 @@ import java.util.ArrayList;
  */
 public abstract class Channel implements Runnable {
     protected final static char[] CRLF = {0xD,0xA};
-
-    protected final String file = "files/log.txt";
 
     MulticastSocket mSocket;
     InetAddress multicastAddress;
@@ -30,20 +26,6 @@ public abstract class Channel implements Runnable {
 
         this.multicastAddress = multicastAddress;
         this.mport = mport;
-    }
-
-    protected String getFile() {
-        return file;
-    }
-
-    protected void updateLogger(String header) {
-        try {
-            PrintWriter out = new PrintWriter(file);
-            out.println(header);
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     protected byte[] getHeaderLineFromSegment(byte[] message, int i) throws ChannelException {
@@ -79,7 +61,7 @@ public abstract class Channel implements Runnable {
             }
         }
 
-        //TODO resolver questao do body header estar divido em varias linhas
+        //TODO resolver questao de como efectuar quando o header contem várias header lines
         String header = headerLines.get(0);
         int bodyLength = message.length - i;
         byte[] body = new byte[bodyLength];
