@@ -77,7 +77,6 @@ public abstract class Channel implements Runnable {
         byte[] buf = message.getBytes();
         DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
 
-        this.updateLogger(message);
         mSocket.send(datagramPacket);
     }
 }
