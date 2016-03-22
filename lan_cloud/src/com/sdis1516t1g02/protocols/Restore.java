@@ -3,9 +3,6 @@ package com.sdis1516t1g02.protocols;
 /**
  * Created by Duarte on 19/03/2016.
  */
-public class Restore implements Runnable {
-    @Override
-    public void run() {
+public class Restore {
 
-    }
 }

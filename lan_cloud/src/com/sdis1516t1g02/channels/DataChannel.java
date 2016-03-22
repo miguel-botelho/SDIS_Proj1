@@ -22,11 +22,19 @@ public abstract class DataChannel extends Channel {
             DatagramPacket mpacket = new DatagramPacket(buf,buf.length);
             try {
                 this.mSocket.receive(mpacket);
-                this.handleReceivedPacket(mpacket);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            handleReceivedPacket(mpacket);
+                        }catch (ChannelException e) {
+                            System.out.println(e.getMessage());
+                            e.printStackTrace();
+                        }
+
+                    }
+                }).start();
             } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ChannelException e) {
-                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
         }
