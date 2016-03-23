@@ -22,7 +22,7 @@ public class ChunkManager {
         return fileId+"_"+chunkNo;
     }
 
-    public boolean addChunk(String fileId, int chunkNo, byte[] data) throws ChunkException {
+    public boolean addChunk(String fileId, int chunkNo, byte[] data, int replicationDegree) throws ChunkException {
         if(!Server.getInstance().hasSpaceForChunk())
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
@@ -31,7 +31,13 @@ public class ChunkManager {
             files.put(fileId, backupFile);
         }
 
-        Chunk chunk = backupFile.chunks.get(new Integer(chunkNo));
+        Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile);
+        return storeChunk(data, chunk);
+    }
+
+    protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile) throws ChunkException {
+        Chunk chunk;
+        chunk = backupFile.chunks.get(new Integer(chunkNo));
         if(chunk != null) {
             synchronized (chunk.state) {
                 if (chunk.getState() == Chunk.State.STORED)
@@ -39,9 +45,13 @@ public class ChunkManager {
 
             }
         }else{
-            chunk = new Chunk(chunkNo,generateFilename(fileId,chunkNo));
+            chunk = new Chunk(chunkNo,generateFilename(fileId,chunkNo), replicationDegree);
         }
         chunk.setState(Chunk.State.STORED);
+        return chunk;
+    }
+
+    protected boolean storeChunk(byte[] data, Chunk chunk) throws ChunkException {
         File chunkFile = new File(FOLDER_PATH+chunk.filename+CHUNK_EXTENSION);
         try {
             if(!chunkFile.createNewFile())
