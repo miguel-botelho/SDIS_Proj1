@@ -32,7 +32,7 @@ public class ChunkManager {
         }
 
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile);
-        return storeChunk(data, chunk);
+        return writeChunk(data, chunk);
     }
 
     protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile) throws ChunkException {
@@ -51,7 +51,7 @@ public class ChunkManager {
         return chunk;
     }
 
-    protected boolean storeChunk(byte[] data, Chunk chunk) throws ChunkException {
+    protected boolean writeChunk(byte[] data, Chunk chunk) throws ChunkException {
         File chunkFile = new File(FOLDER_PATH+chunk.filename+CHUNK_EXTENSION);
         try {
             if(!chunkFile.createNewFile())
@@ -68,12 +68,43 @@ public class ChunkManager {
                 }
             } finally {
                 out.close();
+                chunk.addNetworkCopy();
                 return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    protected byte[] readChunk(Chunk chunk) throws ChunkException {
+        String path = FOLDER_PATH+chunk.filename+CHUNK_EXTENSION;
+        File chunkFile = new File(path);
+        try {
+            if(!chunkFile.exists())
+                throw new ChunkException("Chunk file doesn't exist! Chunk-"+chunk.chunkNo +" Path-"+path);
+            FileInputStream in = new FileInputStream(chunkFile);
+            byte data[]= new byte[Server.CHUNK_SIZE];
+
+            try {
+                java.nio.channels.FileLock lock = in.getChannel().lock();
+                try {
+                    Reader reader = new InputStreamReader(in);
+                    char cbuf[] = new char[Server.CHUNK_SIZE/2];
+                    reader.read(cbuf);
+                    String dataStr = new String(cbuf);
+                    data = dataStr.getBytes();
+                } finally {
+                    lock.release();
+                }
+            } finally {
+                in.close();
+                return data;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        throw new ChunkException("Unknown error reading from file!");
     }
 
 }

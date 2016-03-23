@@ -13,7 +13,8 @@ public class Chunk {
     int chunkNo;
     String filename;
     final int replicationDegree;
-    int networkCopies = 1;
+    int networkCopies = 0;
+
     public Chunk(int chunkNo,String filename, int replicationDegree) {
         this.chunkNo = chunkNo;
         this.filename = filename;
