@@ -28,7 +28,7 @@ public class Server {
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
-
+    private long availableSpace = 1024*1024*1024; //1GB
 
     public static Server getInstance() {
         return ourInstance;
@@ -71,5 +71,33 @@ public class Server {
 
     public void setMdr(DataRestore mdr) {
         this.mdr = mdr;
+    }
+
+    public long getAvailableSpace() {
+        return availableSpace;
+    }
+
+    public boolean hasSpaceForChunk(){
+        if (availableSpace >= CHUNK_SIZE)
+            return true;
+        else
+            return false;
+    }
+
+    public boolean allocateSpaceForChunk(){
+        if(hasSpaceForChunk()){
+            availableSpace -= CHUNK_SIZE;
+            return true;
+        }else
+            return false;
+
+    }
+
+    public static String getByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 }
