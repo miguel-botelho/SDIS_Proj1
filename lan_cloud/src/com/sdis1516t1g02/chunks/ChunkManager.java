@@ -172,5 +172,7 @@ public class ChunkManager {
         return true;
     }
 
-
+    public Hashtable<String, BackupFile> getFiles() {
+        return files;
+    }
 }

@@ -14,4 +14,11 @@ public class BackupFile {
         this.chunks = new Hashtable<>();
     }
 
+    public Hashtable<Integer, Chunk> getChunks() {
+        return chunks;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
 }
