@@ -47,7 +47,9 @@ public class Chunk {
         return networkCopies;
     }
 
-    public void addNetworkCopy(){
+    public void incNetworkCopy(){
         this.networkCopies++;
     }
+
+    public void decrNetworkCopy(){ this.networkCopies--; }
 }

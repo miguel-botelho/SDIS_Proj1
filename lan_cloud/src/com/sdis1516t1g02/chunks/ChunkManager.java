@@ -97,7 +97,7 @@ public class ChunkManager {
                 }
             } finally {
                 out.close();
-                chunk.addNetworkCopy();
+                chunk.incNetworkCopy();
                 return true;
             }
         } catch (IOException e) {
