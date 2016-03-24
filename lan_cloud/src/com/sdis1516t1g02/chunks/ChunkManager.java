@@ -25,7 +25,7 @@ public class ChunkManager {
     }
 
     public boolean addChunk(String fileId, int chunkNo, byte[] data, int replicationDegree) throws ChunkException {
-        if(!Server.getInstance().hasSpaceForChunk())
+        if(!Server.getInstance().allocateSpace(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
@@ -101,6 +101,7 @@ public class ChunkManager {
                 return true;
             }
         } catch (IOException e) {
+            Server.getInstance().freeSpace(data.length);
             e.printStackTrace();
         }
         return false;
@@ -139,11 +140,14 @@ public class ChunkManager {
 
     protected boolean deleteChunk(Chunk chunk) {
         Path path = Paths.get(FOLDER_PATH,chunk.filename,CHUNK_EXTENSION);
+        File chunkFile = new File(FOLDER_PATH+chunk.filename,CHUNK_EXTENSION);
+        long size = chunkFile.getTotalSpace();
         int i;
         for (i = 0; i < 5 ; i++) {
             try{
                 try {
                     Files.delete(path);
+                    Server.getInstance().freeSpace(size);
                 } catch (NoSuchFileException x) {
                     System.err.format("%s: no such" + " file or directory%n", path);
                     throw x;
