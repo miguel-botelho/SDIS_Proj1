@@ -3,9 +3,13 @@ package com.sdis1516t1g02;
 import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
+import com.sdis1516t1g02.chunks.ChunkManager;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.UUID;
 
 /**
  * Created by Duarte on 19/03/2016.
@@ -24,29 +28,38 @@ public class Server {
 
     public final static String VERSION = "1.0";
 
-    private static Server ourInstance = new Server();
+    private static Server ourInstance;
+    private final ChunkManager chunckManager;
+    private String id;
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
+    private long availableSpace = 1024*1024*1024; //1GB
 
-
-    public static Server getInstance() {
+    public static Server getInstance(){
+        try{
+            if(ourInstance == null)
+                ourInstance  = new Server();
+        } catch (IOException e) {
+            System.out.println("Unable to start server!");
+            e.printStackTrace();
+        }
         return ourInstance;
     }
 
-    private Server() {
-        try {
-            this.setMc(new Control(InetAddress.getByAddress(MC_ADDRESS.getBytes()),MC_PORT));
-            this.setMdb(new DataBackup(InetAddress.getByAddress(MDB_ADDRESS.getBytes()), MDB_PORT));
-            this.setMdr(new DataRestore(InetAddress.getByAddress(MDR_ADDRESS.getBytes()), MDR_PORT));
+    private Server() throws IOException {
 
-            new Thread(this.mc).start();
-            new Thread(this.mdb).start();
-            new Thread(this.mdr).start();
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.id = InetAddress.getLocalHost().getHostName();
+        this.setMc(new Control(InetAddress.getByAddress(MC_ADDRESS.getBytes()),MC_PORT));
+        this.setMdb(new DataBackup(InetAddress.getByAddress(MDB_ADDRESS.getBytes()), MDB_PORT));
+        this.setMdr(new DataRestore(InetAddress.getByAddress(MDR_ADDRESS.getBytes()), MDR_PORT));
+
+        new Thread(this.mc).start();
+        new Thread(this.mdb).start();
+        new Thread(this.mdr).start();
+
+        this.chunckManager = new ChunkManager();
+
     }
 
     public Control getMc() {
@@ -71,5 +84,41 @@ public class Server {
 
     public void setMdr(DataRestore mdr) {
         this.mdr = mdr;
+    }
+
+    public long getAvailableSpace() {
+        return availableSpace;
+    }
+
+    public boolean hasSpaceForChunk(){
+        if (availableSpace >= CHUNK_SIZE)
+            return true;
+        else
+            return false;
+    }
+
+    public boolean allocateSpaceForChunk(){
+        if(hasSpaceForChunk()){
+            availableSpace -= CHUNK_SIZE;
+            return true;
+        }else
+            return false;
+
+    }
+
+    public static String getByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public ChunkManager getChunckManager() {
+        return chunckManager;
     }
 }

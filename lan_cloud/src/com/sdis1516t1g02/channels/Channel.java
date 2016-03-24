@@ -55,7 +55,7 @@ public abstract class Channel implements Runnable {
 
     protected abstract void handleMessage(String header, byte[] body) throws MessageException;
 
-    private void sendMessage(String message) throws ChannelException, IOException {
+    protected void sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.CONTROL_BUF_SIZE+" bytes.");
 

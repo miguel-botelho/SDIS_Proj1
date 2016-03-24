@@ -50,10 +50,12 @@ public class Control extends Channel {
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");
         String messageType = splitHeader[0];
+        String version = splitHeader[1];
+        String senderId = splitHeader[2];
+        if(senderId == Server.getInstance().getId())
+            return;
         switch (MessageType.valueOf(messageType)){
             case DELETE:
-                String version = splitHeader[1];
-                String senderId = splitHeader[2];
                 String fileId = splitHeader[3];
                 if(!isValidVersionNumber(version))
                     throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);

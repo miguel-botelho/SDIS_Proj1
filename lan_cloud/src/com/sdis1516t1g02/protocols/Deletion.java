@@ -1,5 +1,7 @@
 package com.sdis1516t1g02.protocols;
 
+import com.sdis1516t1g02.Server;
+
 /**
  * Created by Duarte on 19/03/2016.
  */
@@ -20,8 +22,7 @@ public class Deletion{
     }
 
     public void deleteChunk(){
-        //TODO Implementar o pedido de apagar quando o chunk manager estiver terminado
         if(version >= 1.0)
-            /*Pedir ao chunck Manager que elimine todos os chunks com fileId*/;
+            Server.getInstance().getChunckManager().deleteFile(this.fileId);
     }
 }
