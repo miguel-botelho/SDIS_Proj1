@@ -4,7 +4,9 @@ import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 
 /**
@@ -27,6 +29,7 @@ public class Server {
     private DataBackup mdb;
     private DataRestore mdr;
 
+    private final String file = "files/log.txt";
 
     public static Server getInstance() {
         return ourInstance;
@@ -45,6 +48,20 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateLogger(String header) {
+        try {
+            PrintWriter out = new PrintWriter(file);
+            out.println(header);
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getFile() {
+        return file;
     }
 
     public Control getMc() {

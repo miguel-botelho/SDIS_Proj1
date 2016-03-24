@@ -14,6 +14,6 @@ public class DataRestore extends DataChannel {
 
     @Override
     protected void handleMessage(String header, byte[] body) {
-        this.updateLogger(header);
+
     }
 }
