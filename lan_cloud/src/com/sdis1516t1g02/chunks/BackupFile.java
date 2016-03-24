@@ -8,8 +8,13 @@ import java.util.Hashtable;
 public class BackupFile {
     String fileId;
     Hashtable<Integer,Chunk> chunks;
-
+    boolean backedUp = false;
     public BackupFile(String fileId) {
+        this.fileId = fileId;
+        this.chunks = new Hashtable<>();
+    }
+
+    public BackupFile(String fileId, boolean backedUp) {
         this.fileId = fileId;
         this.chunks = new Hashtable<>();
     }

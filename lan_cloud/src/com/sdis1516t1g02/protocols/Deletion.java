@@ -10,15 +10,15 @@ public class Deletion{
     String senderId;
     double version;
     String fileId;
-    MessageType action;
+    MessageType messageType;
     String args[];
 
-    public Deletion(MessageType action, String versionStr, String senderId, String fileId, String[] args) {
+    public Deletion(MessageType messageType, String versionStr, String senderId, String fileId, String[] args) {
         this.args = args;
         this.senderId = senderId;
         this.version = Double.valueOf(versionStr);
         this.fileId = fileId;
-        this.action = action;
+        this.messageType = messageType;
     }
 
     public void deleteChunk(){

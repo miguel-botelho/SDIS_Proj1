@@ -6,7 +6,7 @@ package com.sdis1516t1g02.chunks;
 public class Chunk {
 
     enum State{
-        RECLAIMED,STORED,REMOVED, NETWORK
+        RECLAIMED,STORED,REMOVED, NETWORK, BACKUP
     }
 
     State state = State.NETWORK;

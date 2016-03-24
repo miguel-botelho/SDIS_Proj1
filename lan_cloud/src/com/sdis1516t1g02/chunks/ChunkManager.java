@@ -175,4 +175,16 @@ public class ChunkManager {
     public Hashtable<String, BackupFile> getFiles() {
         return files;
     }
+
+    public Chunk getChunk(String fileId, int chunkNo) throws ChunkException {
+        BackupFile backupFile = files.get(fileId);
+        if(backupFile == null){
+            throw new ChunkException("No information about file with fileId="+fileId);
+        }
+        Chunk chunk = backupFile.chunks.get(chunkNo);
+        if(chunk == null)
+            throw new ChunkException("No information about chunk");
+
+        return chunk;
+    }
 }
