@@ -4,9 +4,7 @@ import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 
 /**
@@ -24,44 +22,33 @@ public class Server {
     public final static String MDR_ADDRESS = "224.0.0.192";
     public final static int MDR_PORT = 4448;
 
-    private static Server ourInstance = new Server();
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
-
-    private final String file = "files/log.txt";
 
     public static Server getInstance() {
         return ourInstance;
     }
 
+    private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+
+    private static Server ourInstance = new Server();
+
     private Server() {
         try {
-            this.setMc(new Control(InetAddress.getByAddress(MC_ADDRESS.getBytes()),MC_PORT));
-            this.setMdb(new DataBackup(InetAddress.getByAddress(MDB_ADDRESS.getBytes()), MDB_PORT));
-            this.setMdr(new DataRestore(InetAddress.getByAddress(MDR_ADDRESS.getBytes()), MDR_PORT));
+            this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
+            this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
+            this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
 
             new Thread(this.mc).start();
             new Thread(this.mdb).start();
             new Thread(this.mdr).start();
-            
+
+            this.logger.updateLogger(mc, true, "msgTeste");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void updateLogger(String header) {
-        try {
-            PrintWriter out = new PrintWriter(file);
-            out.println(header);
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String getFile() {
-        return file;
     }
 
     public Control getMc() {

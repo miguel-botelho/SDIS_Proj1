@@ -1,0 +1,4 @@
+mar 24, 2016 5:11:23 PM com.sdis1516t1g02.LoggerServer <init>
+INFO: Initiating Server.
+mar 24, 2016 5:11:24 PM com.sdis1516t1g02.LoggerServer updateLogger
+INFO: Channel: com.sdis1516t1g02.channels.Control, Type: Sent, Message: msgTeste
