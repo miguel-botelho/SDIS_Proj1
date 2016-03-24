@@ -3,7 +3,9 @@ package com.sdis1516t1g02.chunks;
 import com.sdis1516t1g02.Server;
 
 import java.io.*;
+import java.nio.file.*;
 import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Created by Duarte on 21/03/2016.
@@ -33,6 +35,33 @@ public class ChunkManager {
 
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile);
         return writeChunk(data, chunk);
+    }
+
+    public byte[] getChunkData(String fileId, int chunkNo) throws ChunkException {
+        BackupFile backupFile = files.get(fileId);
+        if(backupFile == null){
+            throw new ChunkException("No information about file with fileId="+fileId);
+        }
+        Chunk chunk = backupFile.chunks.get(chunkNo);
+        if(chunk == null || chunk.getState() != Chunk.State.STORED)
+            throw new ChunkException("fileId= "+ fileId +" chunkNo="+chunkNo+" not stored");
+        return readChunk(chunk);
+    }
+
+    public boolean deleteFile(String fileId){
+        BackupFile backupFile = files.get(fileId);
+        if(backupFile == null){
+            return false;
+        }
+        Set<Integer> keySet = backupFile.chunks.keySet();
+        for(Integer key : keySet){
+            Chunk chunk = backupFile.chunks.get(key);
+            if(deleteChunk(chunk)) {
+                chunk.setState(Chunk.State.REMOVED);
+                chunk.networkCopies = 0;
+            }
+        }
+        return true;
     }
 
     protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile) throws ChunkException {
@@ -106,5 +135,42 @@ public class ChunkManager {
         }
         throw new ChunkException("Unknown error reading from file!");
     }
+
+
+    protected boolean deleteChunk(Chunk chunk) {
+        Path path = Paths.get(FOLDER_PATH,chunk.filename,CHUNK_EXTENSION);
+        int i;
+        for (i = 0; i < 5 ; i++) {
+            try{
+                try {
+                    Files.delete(path);
+                } catch (NoSuchFileException x) {
+                    System.err.format("%s: no such" + " file or directory%n", path);
+                    throw x;
+                } catch (DirectoryNotEmptyException x) {
+                    System.err.format("%s not empty%n", path);
+                    throw x;
+                } catch (IOException x) {
+                    // File permission problems are caught here.
+                    System.err.println(x);
+                    throw x;
+                }
+            }catch (Exception x){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+
+            break;
+        }
+        if (i >= 5)
+            return false;
+
+        return true;
+    }
+
 
 }
