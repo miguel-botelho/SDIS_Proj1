@@ -33,15 +33,16 @@ public abstract class Channel implements Runnable {
         byte[] message = mpacket.getData();
 
         String messageStr = new String(message,0,mpacket.getLength());
-        String splitMessage[] = messageStr.split("\\r\\n\\r\\n");
+        String splitMessage[] = messageStr.split("\\r\\n");
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
         String header = splitMessage[0];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             for(int i = 1; i < splitMessage.length; i++){
                 outputStream.write(splitMessage[i].getBytes());
             }
+            //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
             byte[] body = outputStream.toByteArray();
             handleMessage(header,body);
         } catch (MessageException e) {
