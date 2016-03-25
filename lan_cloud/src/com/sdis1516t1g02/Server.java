@@ -36,7 +36,11 @@ public class Server {
     private DataRestore mdr;
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
-    public static Server getInstance(){
+
+	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+    private static Server ourInstance = new Server();
+    
+    public static Server getInstance() {
         try{
             if(ourInstance == null)
                 ourInstance  = new Server();
@@ -50,13 +54,13 @@ public class Server {
     private Server() throws IOException {
 
         this.id = InetAddress.getLocalHost().getHostName();
-        this.setMc(new Control(InetAddress.getByAddress(MC_ADDRESS.getBytes()),MC_PORT));
-        this.setMdb(new DataBackup(InetAddress.getByAddress(MDB_ADDRESS.getBytes()), MDB_PORT));
-        this.setMdr(new DataRestore(InetAddress.getByAddress(MDR_ADDRESS.getBytes()), MDR_PORT));
+        this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
+		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
+        this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
 
-        new Thread(this.mc).start();
+		new Thread(this.mc).start();
         new Thread(this.mdb).start();
-        new Thread(this.mdr).start();
+       	new Thread(this.mdr).start();
 
         this.chunckManager = new ChunkManager();
 
