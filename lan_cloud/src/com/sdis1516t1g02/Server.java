@@ -37,6 +37,9 @@ public class Server {
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
 
+	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+    private static Server ourInstance = new Server();
+    
     public static Server getInstance() {
         try{
             if(ourInstance == null)
@@ -47,10 +50,6 @@ public class Server {
         }
         return ourInstance;
     }
-
-    private Server() throws IOException {
-
-    private static Server ourInstance = new Server();
 
     private Server() throws IOException {
 
