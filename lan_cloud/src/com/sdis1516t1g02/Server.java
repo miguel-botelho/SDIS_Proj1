@@ -43,9 +43,6 @@ public class Server {
             new Thread(this.mc).start();
             new Thread(this.mdb).start();
             new Thread(this.mdr).start();
-
-            //this.logger.updateLogger(mc, true, "msgTeste");
-
         } catch (IOException e) {
             e.printStackTrace();
         }
