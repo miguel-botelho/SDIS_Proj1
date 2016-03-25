@@ -3,21 +3,24 @@ package com.sdis1516t1g02.chunks;
 /**
  * Created by Duarte on 22/03/2016.
  */
-public class Chunk {
+public class Chunk implements Comparable<Chunk>{
 
-    enum State{
+    public enum State{
         RECLAIMED,STORED,REMOVED, NETWORK, BACKUP
     }
 
     State state = State.NETWORK;
     int chunkNo;
-    String filename;
+    String chunkFileName;
     final int replicationDegree;
     int networkCopies = 0;
+    BackupFile file;
 
-    public Chunk(int chunkNo,String filename, int replicationDegree) {
+
+    public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree) {
+        this.file = file;
         this.chunkNo = chunkNo;
-        this.filename = filename;
+        this.chunkFileName = filename;
         this.replicationDegree = replicationDegree;
     }
 
@@ -35,8 +38,8 @@ public class Chunk {
         }
     }
 
-    public String getFilename() {
-        return filename;
+    public String getChunkFileName() {
+        return chunkFileName;
     }
 
     public int getReplicationDegree() {
@@ -52,4 +55,14 @@ public class Chunk {
     }
 
     public void decrNetworkCopy(){ this.networkCopies--; }
+
+    public void setChunkAsReclaimed(){
+        this.setState(State.RECLAIMED);
+        this.decrNetworkCopy();
+    }
+
+    @Override
+    public int compareTo(Chunk o) {
+        return (this.networkCopies - this.replicationDegree) - (o.networkCopies-o.replicationDegree);
+    }
 }

@@ -2,6 +2,7 @@ package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -36,19 +37,18 @@ public abstract class Channel implements Runnable {
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
         String header = splitMessage[0];
-        byte[] body = new byte[0];
-        for(int i = 1; i < splitMessage.length; i++){
-            byte[] tempBody = splitMessage[i].getBytes();
-            byte[] previousBody = body.clone();
-            body = new byte[previousBody.length+tempBody.length];
-            System.arraycopy(previousBody,0,body,0,previousBody.length);
-            System.arraycopy(tempBody,0,body,previousBody.length,tempBody.length);
-        }
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
         try {
+            for(int i = 1; i < splitMessage.length; i++){
+                outputStream.write(splitMessage[i].getBytes());
+            }
+            byte[] body = outputStream.toByteArray();
             handleMessage(header,body);
         } catch (MessageException e) {
             e.printStackTrace();
             throw new ChannelException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

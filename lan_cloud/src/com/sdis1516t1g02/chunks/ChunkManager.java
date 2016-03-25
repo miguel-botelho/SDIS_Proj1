@@ -4,6 +4,7 @@ import com.sdis1516t1g02.Server;
 
 import java.io.*;
 import java.nio.file.*;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class ChunkManager {
     }
 
     public boolean addChunk(String fileId, int chunkNo, byte[] data, int replicationDegree) throws ChunkException {
-        if(!Server.getInstance().allocateSpace(data.length))
+        if(!Server.getInstance().hasSpaceForChunk(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
@@ -48,20 +49,23 @@ public class ChunkManager {
         return readChunk(chunk);
     }
 
-    public boolean deleteFile(String fileId){
+    public long deleteFile(String fileId){
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
-            return false;
+            return -1;
         }
+        long deletedSpace = 0;
         Set<Integer> keySet = backupFile.chunks.keySet();
         for(Integer key : keySet){
             Chunk chunk = backupFile.chunks.get(key);
-            if(deleteChunk(chunk)) {
+            long deletedChunkSize = deleteChunk(chunk);
+            if(deletedChunkSize>=0) {
                 chunk.setState(Chunk.State.REMOVED);
                 chunk.networkCopies = 0;
+                deletedSpace += deletedChunkSize;
             }
         }
-        return true;
+        return deletedSpace;
     }
 
     protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile) throws ChunkException {
@@ -69,19 +73,21 @@ public class ChunkManager {
         chunk = backupFile.chunks.get(new Integer(chunkNo));
         if(chunk != null) {
             synchronized (chunk.state) {
-                if (chunk.getState() == Chunk.State.STORED)
+                if (chunk.getState().equals(Chunk.State.STORED))
                     throw new ChunkException("Chunk is already stored");
 
             }
         }else{
-            chunk = new Chunk(chunkNo,generateFilename(fileId,chunkNo), replicationDegree);
+            chunk = new Chunk(backupFile, chunkNo,generateFilename(fileId,chunkNo), replicationDegree);
         }
         chunk.setState(Chunk.State.STORED);
         return chunk;
     }
 
     protected boolean writeChunk(byte[] data, Chunk chunk) throws ChunkException {
-        File chunkFile = new File(FOLDER_PATH+chunk.filename+CHUNK_EXTENSION);
+        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName +CHUNK_EXTENSION);
+        if(!Server.getInstance().allocateSpace(data.length))
+            throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         try {
             if(!chunkFile.createNewFile())
                 throw new ChunkException("Chunk file was already stored but there was no record");
@@ -108,7 +114,7 @@ public class ChunkManager {
     }
 
     protected byte[] readChunk(Chunk chunk) throws ChunkException {
-        String path = FOLDER_PATH+chunk.filename+CHUNK_EXTENSION;
+        String path = FOLDER_PATH+chunk.chunkFileName +CHUNK_EXTENSION;
         File chunkFile = new File(path);
         try {
             if(!chunkFile.exists())
@@ -138,9 +144,9 @@ public class ChunkManager {
     }
 
 
-    protected boolean deleteChunk(Chunk chunk) {
-        Path path = Paths.get(FOLDER_PATH,chunk.filename,CHUNK_EXTENSION);
-        File chunkFile = new File(FOLDER_PATH+chunk.filename,CHUNK_EXTENSION);
+    public long deleteChunk(Chunk chunk) {
+        Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName,CHUNK_EXTENSION);
+        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName,CHUNK_EXTENSION);
         long size = chunkFile.getTotalSpace();
         int i;
         for (i = 0; i < 5 ; i++) {
@@ -171,9 +177,9 @@ public class ChunkManager {
             break;
         }
         if (i >= 5)
-            return false;
+            return -1;
 
-        return true;
+        return size;
     }
 
     public Hashtable<String, BackupFile> getFiles() {
@@ -190,5 +196,16 @@ public class ChunkManager {
             throw new ChunkException("No information about chunk");
 
         return chunk;
+    }
+
+    public ArrayList<Chunk> getStoredChunks(){
+        ArrayList<Chunk> chunksList = new ArrayList<>();
+        Set<String> keys = files.keySet();
+
+        for(String key : keys){
+            chunksList.addAll(files.get(key).getStoredChunks());
+        }
+
+        return chunksList;
     }
 }
