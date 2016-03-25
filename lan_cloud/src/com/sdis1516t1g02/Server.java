@@ -34,7 +34,7 @@ public class Server {
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
-    private long availableSpace = 1024*1024*1024; //1GB
+    private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
     public static Server getInstance(){
         try{
@@ -90,20 +90,30 @@ public class Server {
         return availableSpace;
     }
 
-    public boolean hasSpaceForChunk(){
-        if (availableSpace >= CHUNK_SIZE)
-            return true;
-        else
-            return false;
+    public synchronized boolean hasSpaceForChunk(long chunkSize){
+        synchronized (availableSpace){
+            if (availableSpace >= chunkSize)
+                return true;
+            else
+                return false;
+        }
+
     }
 
-    public boolean allocateSpaceForChunk(){
-        if(hasSpaceForChunk()){
-            availableSpace -= CHUNK_SIZE;
-            return true;
-        }else
-            return false;
+    public synchronized boolean allocateSpace(long chunkSize){
+        synchronized (availableSpace) {
+            if (hasSpaceForChunk(chunkSize)) {
+                availableSpace -= chunkSize;
+                return true;
+            } else
+                return false;
+        }
+    }
 
+    public synchronized void freeSpace(long size){
+        synchronized (availableSpace){
+            availableSpace += size;
+        }
     }
 
     public static String getByteCount(long bytes, boolean si) {
