@@ -38,8 +38,7 @@ public class Server {
 
 
 	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
-    private static Server ourInstance = new Server();
-    
+
     public static Server getInstance() {
         try{
             if(ourInstance == null)

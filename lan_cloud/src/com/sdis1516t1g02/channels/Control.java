@@ -46,7 +46,16 @@ public class Control extends Channel {
         }
     }
 
-
+    public void sendRemovedMessage(String fileId, int chunkNo){
+        String header= buildHeader(MessageType.REMOVED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        try {
+            sendMessage(header);
+        } catch (ChannelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
@@ -70,7 +79,7 @@ public class Control extends Channel {
                 Deletion delete = new Deletion(MessageType.DELETE,version,senderId,fileId,args);
                 delete.deleteChunk();
                 break;
-            case STORED:
+            case STORED:    //A recepção da mensagem stored pertence ao protocolo
             case REMOVED:
                 if(splitHeader.length < 5)
                     throw new MessageException(header,MessageException.ExceptionType.INVALID_NUMBER_FIELDS);

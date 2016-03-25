@@ -5,6 +5,7 @@ import com.sdis1516t1g02.Server;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
@@ -69,7 +70,18 @@ public abstract class Channel implements Runnable {
 
         byte[] buf = message.getBytes();
         DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
+        MulticastSocket socket = new MulticastSocket();
+        socket.send(datagramPacket);
+    }
 
-        mSocket.send(datagramPacket);
+    protected static String buildHeader(String... fields){
+        if(fields.length == 0)
+            return "";
+        String header=fields[0];
+        for(int i = 1; i < fields.length; i++){
+            header.concat(" "+fields[i]);
+        }
+        header.concat(CRLF+CRLF);
+        return header;
     }
 }

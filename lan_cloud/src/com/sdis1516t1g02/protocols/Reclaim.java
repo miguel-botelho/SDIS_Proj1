@@ -36,6 +36,7 @@ public class Reclaim {
                 chunk.setChunkAsReclaimed();
                 reclaimedSpace += deletedSpace;
             }
+            Server.getInstance().getMc().sendRemovedMessage(chunk.getFile().getFileId(),chunk.getChunkNo());
             i++;
         }
 

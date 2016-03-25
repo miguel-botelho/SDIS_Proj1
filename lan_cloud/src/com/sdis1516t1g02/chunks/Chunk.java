@@ -61,6 +61,10 @@ public class Chunk implements Comparable<Chunk>{
         this.decrNetworkCopy();
     }
 
+    public BackupFile getFile() {
+        return file;
+    }
+
     @Override
     public int compareTo(Chunk o) {
         return (this.networkCopies - this.replicationDegree) - (o.networkCopies-o.replicationDegree);
