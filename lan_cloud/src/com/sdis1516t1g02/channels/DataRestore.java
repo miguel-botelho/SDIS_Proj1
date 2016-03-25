@@ -1,7 +1,6 @@
 package com.sdis1516t1g02.channels;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
 
 /**

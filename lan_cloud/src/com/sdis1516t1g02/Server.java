@@ -3,16 +3,20 @@ package com.sdis1516t1g02;
 import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
+import com.sdis1516t1g02.chunks.ChunkManager;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.UUID;
 
 /**
  * Created by Duarte on 19/03/2016.
  */
 public class Server {
     public final static int CHUNK_SIZE= 64*1000;
-    public final static int CONTROL_BUF_SIZE= 64;
+    public final static int CONTROL_BUF_SIZE= 256;
     public final static int DATA_BUF_SIZE= CHUNK_SIZE+CONTROL_BUF_SIZE;
 
     public final static String MC_ADDRESS = "224.0.0.128";
@@ -22,33 +26,45 @@ public class Server {
     public final static String MDR_ADDRESS = "224.0.0.192";
     public final static int MDR_PORT = 4448;
 
+    public final static String VERSION = "1.0";
+
+    private static Server ourInstance;
+    private final ChunkManager chunckManager;
+    private String id;
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
+    private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
+
 
     public static Server getInstance() {
+        try{
+            if(ourInstance == null)
+                ourInstance  = new Server();
+        } catch (IOException e) {
+            System.out.println("Unable to start server!");
+            e.printStackTrace();
+        }
         return ourInstance;
     }
 
-    private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+    private Server() throws IOException {
 
     private static Server ourInstance = new Server();
 
-    private Server() {
-        try {
-            this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
-            this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
-            this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
+    private Server() throws IOException {
 
-            new Thread(this.mc).start();
-            new Thread(this.mdb).start();
-            new Thread(this.mdr).start();
+        this.id = InetAddress.getLocalHost().getHostName();
+        this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
+		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
+        this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
 
-            //this.logger.updateLogger(mc, true, "msgTeste");
+		new Thread(this.mc).start();
+        new Thread(this.mdb).start();
+       	new Thread(this.mdr).start();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.chunckManager = new ChunkManager();
+
     }
 
     public Control getMc() {
@@ -73,5 +89,51 @@ public class Server {
 
     public void setMdr(DataRestore mdr) {
         this.mdr = mdr;
+    }
+
+    public long getAvailableSpace() {
+        return availableSpace;
+    }
+
+    public synchronized boolean hasSpaceForChunk(long chunkSize){
+        synchronized (availableSpace){
+            if (availableSpace >= chunkSize)
+                return true;
+            else
+                return false;
+        }
+
+    }
+
+    public synchronized boolean allocateSpace(long chunkSize){
+        synchronized (availableSpace) {
+            if (hasSpaceForChunk(chunkSize)) {
+                availableSpace -= chunkSize;
+                return true;
+            } else
+                return false;
+        }
+    }
+
+    public synchronized void freeSpace(long size){
+        synchronized (availableSpace){
+            availableSpace += size;
+        }
+    }
+
+    public static String getByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public ChunkManager getChunckManager() {
+        return chunckManager;
     }
 }

@@ -2,6 +2,7 @@ package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  * Created by Duarte on 19/03/2016.
  */
 public abstract class Channel implements Runnable {
-    protected final static char[] CRLF = {0xD,0xA};
+    protected final static String CRLF = "\r\n";
 
     MulticastSocket mSocket;
     InetAddress multicastAddress;
@@ -28,49 +29,41 @@ public abstract class Channel implements Runnable {
         this.mport = mport;
     }
 
-    protected byte[] getHeaderLineFromSegment(byte[] message, int i) throws ChannelException {
-        int init_i = i;
-        for(;i < message.length; i=+2){
-            if(i < message.length-1 && message[i] == CRLF[0] && message[i+1] == CRLF[i+1])  //FIM DA MENSAGEM
-                break;
-        }
-
-        if(i >= message.length)
-            throw new ChannelException("Header Line without end sequence <CRLF>");
-        int lenght = i- init_i;
-        byte[] headerLine = new byte[lenght];
-
-        System.arraycopy(message,init_i,headerLine,0,lenght);
-        return headerLine;
-    }
-
     protected void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
         byte[] message = mpacket.getData();
 
-        int i;
-        ArrayList<String> headerLines = new ArrayList<>();
+        String messageStr = new String(message,0,mpacket.getLength());
+        String splitMessage[] = messageStr.split("\\r\\n");
 
-        for ( i = 0; i < message.length; i+=2) {                 //PERCORRE A MENSAGEM DE CHAR EM CHAR
-            if(i < message.length-1 && message[i] == CRLF[0] && message[i+1] == CRLF[i+1])  //FIM DA MENSAGEM
-                break;
-            else{
-                byte[] headerLineBytes = getHeaderLineFromSegment(message, i);      //RETIRA HEADER LINE E AVANÇA PARA O PROXIMO HEADER LINE
-                i += headerLineBytes.length;
-                String headerl = new String(headerLineBytes);
-                headerLines.add(headerl);
+        //TODO resolver questao de como efectuar quando o header contem várias header lines
+        String header = splitMessage[0];
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            for(int i = 1; i < splitMessage.length; i++){
+                outputStream.write(splitMessage[i].getBytes());
             }
+            //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
+            byte[] body = outputStream.toByteArray();
+            handleMessage(header,body);
+        } catch (MessageException e) {
+            e.printStackTrace();
+            throw new ChannelException(e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        //TODO resolver questao do body header estar divido em varias linhas
-        String header = headerLines.get(0);
-        int bodyLength = message.length - i;
-        byte[] body = new byte[bodyLength];
-        System.arraycopy(message,i,body,0,bodyLength);
-        handleMessage(header,body);
     }
-    protected abstract void handleMessage(String header, byte[] body);
 
-    private void sendMessage(String message) throws ChannelException, IOException {
+    public boolean isValidVersionNumber(String versionNumber){
+        return versionNumber.matches("\\d\\.\\d");
+    }
+
+    public boolean isValidFileId(String fileId){
+        return fileId.length() == 64;
+    }
+
+    protected abstract void handleMessage(String header, byte[] body) throws MessageException;
+
+    protected void sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.CONTROL_BUF_SIZE+" bytes.");
 
