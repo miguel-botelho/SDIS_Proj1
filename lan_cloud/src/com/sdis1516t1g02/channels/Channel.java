@@ -64,7 +64,7 @@ public abstract class Channel implements Runnable {
 
     protected abstract void handleMessage(String header, byte[] body) throws MessageException;
 
-    protected void sendMessage(String message) throws ChannelException, IOException {
+    protected int sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.CONTROL_BUF_SIZE+" bytes.");
 
@@ -72,16 +72,15 @@ public abstract class Channel implements Runnable {
         DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);
+        return buf.length;
     }
 
     protected static String buildHeader(String... fields){
-        if(fields.length == 0)
-            return "";
-        String header=fields[0];
-        for(int i = 1; i < fields.length; i++){
-            header.concat(" "+fields[i]);
+        String header="";
+        for(String field : fields){
+            header = header.concat(field+" ");
         }
-        header.concat(CRLF+CRLF);
+        header = header.concat(CRLF+CRLF);
         return header;
     }
 }

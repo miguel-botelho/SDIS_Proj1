@@ -25,7 +25,7 @@ public class ChunkManager {
         return fileId+"_"+chunkNo;
     }
 
-    public boolean addChunk(String fileId, int chunkNo, byte[] data, int replicationDegree) throws ChunkException {
+    public boolean addChunk(String fileId, int chunkNo, int replicationDegree, byte[] data) throws ChunkException {
         if(!Server.getInstance().hasSpaceForChunk(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
