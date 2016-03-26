@@ -41,7 +41,7 @@ public abstract class DataChannel extends Channel {
         }
     }
 
-    protected int sendMessage(String message) throws ChannelException, IOException {
+    protected synchronized int sendMessage(String message) throws ChannelException, IOException {
         if (message.getBytes().length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
 

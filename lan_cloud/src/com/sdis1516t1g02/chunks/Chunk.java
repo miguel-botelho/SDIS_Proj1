@@ -1,5 +1,9 @@
 package com.sdis1516t1g02.chunks;
 
+import com.sdis1516t1g02.Server;
+
+import java.util.ArrayList;
+
 /**
  * Created by Duarte on 22/03/2016.
  */
@@ -13,7 +17,7 @@ public class Chunk implements Comparable<Chunk>{
     int chunkNo;
     String chunkFileName;
     final int replicationDegree;
-    int networkCopies = 0;
+    ArrayList<String> networkCopies = new ArrayList<>();
     BackupFile file;
 
 
@@ -22,6 +26,13 @@ public class Chunk implements Comparable<Chunk>{
         this.chunkNo = chunkNo;
         this.chunkFileName = filename;
         this.replicationDegree = replicationDegree;
+    }
+
+    public Chunk(BackupFile file,int chunkNo,int replicationDegree){
+        this.file = file;
+        this.chunkNo = chunkNo;
+        this.replicationDegree = replicationDegree;
+        this.chunkFileName = null;
     }
 
     public int getChunkNo() {
@@ -46,27 +57,47 @@ public class Chunk implements Comparable<Chunk>{
         return replicationDegree;
     }
 
-    public int getNetworkCopies() {
+    public ArrayList<String> getNetworkCopies() {
         return networkCopies;
     }
 
-    public void incNetworkCopy(){
-        this.networkCopies++;
+    public void addNetworkCopy(String serverId){
+        synchronized (networkCopies){
+            if(!this.networkCopies.contains(serverId))
+                this.networkCopies.add(serverId);
+        }
     }
 
-    public void decrNetworkCopy(){ this.networkCopies--; }
+    public void remNetworkCopy(String serverId){
+        synchronized (networkCopies){
+            if(this.networkCopies.contains(serverId))
+                this.networkCopies.remove(serverId);
+        }
+    }
+
+    public int getNumNetworkCopies(){
+        synchronized (networkCopies){
+            return this.networkCopies.size();
+        }
+    }
 
     public void setChunkAsReclaimed(){
         this.setState(State.RECLAIMED);
-        this.decrNetworkCopy();
+        this.remNetworkCopy(Server.getInstance().getId());
     }
 
     public BackupFile getFile() {
         return file;
     }
 
+    public boolean isStored(){
+        synchronized (state){
+            return state.equals(State.STORED);
+        }
+    }
+
     @Override
     public int compareTo(Chunk o) {
-        return (this.networkCopies - this.replicationDegree) - (o.networkCopies-o.replicationDegree);
+        return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);
     }
 }

@@ -92,10 +92,10 @@ public class Control extends Channel {
                     throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
                 String args[]= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
-                Deletion delete = new Deletion(MessageType.DELETE,version,senderId,fileId,args);
-                delete.deleteChunk();
+                Deletion.deleteChunk(MessageType.DELETE,Double.valueOf(version),senderId,fileId,args);
                 break;
-            case STORED:    //A recepção da mensagem stored pertence ao protocolo
+
+            case STORED:    //A recepção da mensagem stored pertence ao protocolo BACKUP mas é tratado no protocol RECLAIM
             case REMOVED:
                 expectedLength = 5;
                 if(splitHeader.length < expectedLength)
@@ -106,7 +106,7 @@ public class Control extends Channel {
                 String chunkNo = splitHeader[4];
                 args= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
-                Reclaim.updateNetworkCopiesOfChunk(MessageType.valueOf(messageType),version,senderId,fileId,chunkNo,args);
+                Reclaim.updateNetworkCopiesOfChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

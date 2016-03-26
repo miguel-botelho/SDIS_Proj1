@@ -51,7 +51,7 @@ public class DataBackup extends DataChannel{
                 String replicationDegree = splitHeader[5];
                 String[] args= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
-                Backup.receiveChunk(MessageType.valueOf(messageType),version,senderId,fileId,chunkNo,replicationDegree,args,body);
+                Backup.receiveChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),Integer.valueOf(replicationDegree),args,body);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

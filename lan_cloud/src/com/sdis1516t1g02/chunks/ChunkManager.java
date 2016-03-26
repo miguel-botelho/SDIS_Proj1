@@ -61,7 +61,7 @@ public class ChunkManager {
             long deletedChunkSize = deleteChunk(chunk);
             if(deletedChunkSize>=0) {
                 chunk.setState(Chunk.State.REMOVED);
-                chunk.networkCopies = 0;
+                chunk.remNetworkCopy(Server.getInstance().getId());
                 deletedSpace += deletedChunkSize;
             }
         }
@@ -103,7 +103,7 @@ public class ChunkManager {
                 }
             } finally {
                 out.close();
-                chunk.incNetworkCopy();
+                chunk.addNetworkCopy(Server.getInstance().getId());
                 return true;
             }
         } catch (IOException e) {
@@ -191,11 +191,7 @@ public class ChunkManager {
         if(backupFile == null){
             throw new ChunkException("No information about file with fileId="+fileId);
         }
-        Chunk chunk = backupFile.chunks.get(chunkNo);
-        if(chunk == null)
-            throw new ChunkException("No information about chunk");
-
-        return chunk;
+        return backupFile.chunks.get(chunkNo);
     }
 
     public ArrayList<Chunk> getStoredChunks(){
