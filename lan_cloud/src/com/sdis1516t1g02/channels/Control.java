@@ -72,6 +72,18 @@ public class Control extends Channel {
         }
     }
 
+    public void sendDeletedMessage(String fileId, int chunkNo){
+        String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        try {
+            sendMessage(header);
+        } catch (ChannelException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");

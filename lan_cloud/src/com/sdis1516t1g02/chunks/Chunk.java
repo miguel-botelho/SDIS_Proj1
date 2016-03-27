@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Chunk implements Comparable<Chunk>{
 
     public enum State{
-        RECLAIMED,STORED,REMOVED, NETWORK, BACKUP
+        RECLAIMED,STORED, DELETED, NETWORK, BACKUP
     }
 
     State state = State.NETWORK;

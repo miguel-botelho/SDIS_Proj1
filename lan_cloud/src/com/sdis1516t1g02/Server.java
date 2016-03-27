@@ -5,6 +5,7 @@ import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -29,7 +30,8 @@ public class Server {
     public final static String VERSION = "1.0";
 
     private static Server ourInstance;
-    private final ChunkManager chunckManager;
+    private final ChunkManager chunckManager = new ChunkManager();
+    private final FileManager fileManager = new FileManager();
     private String id;
     private Control mc;
     private DataBackup mdb;
@@ -60,9 +62,6 @@ public class Server {
 		new Thread(this.mc).start();
         new Thread(this.mdb).start();
        	new Thread(this.mdr).start();
-
-        this.chunckManager = new ChunkManager();
-
     }
 
     public Control getMc() {
@@ -133,5 +132,9 @@ public class Server {
 
     public ChunkManager getChunckManager() {
         return chunckManager;
+    }
+
+    public FileManager getFileManager() {
+        return fileManager;
     }
 }

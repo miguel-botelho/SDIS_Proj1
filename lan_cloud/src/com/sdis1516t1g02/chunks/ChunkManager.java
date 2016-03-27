@@ -60,7 +60,7 @@ public class ChunkManager {
             Chunk chunk = backupFile.chunks.get(key);
             long deletedChunkSize = deleteChunk(chunk);
             if(deletedChunkSize>=0) {
-                chunk.setState(Chunk.State.REMOVED);
+                chunk.setState(Chunk.State.DELETED);
                 chunk.remNetworkCopy(Server.getInstance().getId());
                 deletedSpace += deletedChunkSize;
             }
@@ -147,7 +147,7 @@ public class ChunkManager {
     public long deleteChunk(Chunk chunk) {
         Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName,CHUNK_EXTENSION);
         File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName,CHUNK_EXTENSION);
-        long size = chunkFile.getTotalSpace();
+        long size = chunkFile.length();
         int i;
         for (i = 0; i < 5 ; i++) {
             try{
