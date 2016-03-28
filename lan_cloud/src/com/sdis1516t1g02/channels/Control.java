@@ -5,6 +5,7 @@ import com.sdis1516t1g02.protocols.Deletion;
 import com.sdis1516t1g02.protocols.MessageType;
 import com.sdis1516t1g02.protocols.Reclaim;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -46,11 +47,37 @@ public class Control extends Channel {
         }
     }
 
+    //TODO resolver questão de onde devem ser resolvidas as excepções de mandar mensagens
     public void sendRemovedMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.REMOVED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
             sendMessage(header);
         } catch (ChannelException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendStoredMessage(String fileId, int chunkNo){
+        String header= buildHeader(MessageType.STORED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        try {
+            sendMessage(header);
+        } catch (ChannelException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendDeletedMessage(String fileId, int chunkNo){
+        String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        try {
+            sendMessage(header);
+        } catch (ChannelException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -63,33 +90,35 @@ public class Control extends Channel {
         String messageType = splitHeader[0];
         String version = splitHeader[1];
         String senderId = splitHeader[2];
-        if(senderId == Server.getInstance().getId())
+        if(senderId.equals(Server.getInstance().getId()))
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
         switch (MessageType.valueOf(messageType)){
             case DELETE:
-                if(splitHeader.length < 4)
+                int expectedLength = 4;
+                if(splitHeader.length < expectedLength)
                     throw new MessageException(header,MessageException.ExceptionType.INVALID_NUMBER_FIELDS);
                 String fileId = splitHeader[3];
                 if(!isValidFileId(fileId))
                     throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
-                String args[]= new String[splitHeader.length-4];
-                System.arraycopy(splitHeader,3,args,0,splitHeader.length-1);
-                Deletion delete = new Deletion(MessageType.DELETE,version,senderId,fileId,args);
-                delete.deleteChunk();
+                String args[]= new String[splitHeader.length-expectedLength];
+                System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
+                Deletion.deleteChunk(MessageType.DELETE,Double.valueOf(version),senderId,fileId,args);
                 break;
-            case STORED:    //A recepção da mensagem stored pertence ao protocolo
+
+            case STORED:    //A recepção da mensagem stored pertence ao protocolo BACKUP mas é tratado no protocol RECLAIM
             case REMOVED:
-                if(splitHeader.length < 5)
+                expectedLength = 5;
+                if(splitHeader.length < expectedLength)
                     throw new MessageException(header,MessageException.ExceptionType.INVALID_NUMBER_FIELDS);
                 fileId = splitHeader[3];
                 if(!isValidFileId(fileId))
                     throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
                 String chunkNo = splitHeader[4];
-                args= new String[splitHeader.length-5];
-                System.arraycopy(splitHeader,3,args,0,splitHeader.length-1);
-                Reclaim.updateNetworkCopiesOfChunk(MessageType.valueOf(messageType),version,senderId,fileId,chunkNo,args);
+                args= new String[splitHeader.length-expectedLength];
+                System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
+                Reclaim.updateNetworkCopiesOfChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

@@ -43,17 +43,18 @@ public class Reclaim {
         return reclaimedSpace;
     }
 
-    public static void updateNetworkCopiesOfChunk(MessageType messageType, String versionStr, String senderId, String fileId, String chunkNoStr,String[] args){
-        double version = Double.valueOf(versionStr);
-        int chunkNo = Integer.valueOf(chunkNoStr);
+    public static void updateNetworkCopiesOfChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, String[] args){
         if(version >= 1.0){
             try {
                 Chunk chunk = Server.getInstance().getChunckManager().getChunk(fileId,chunkNo);
+                if(chunk == null)
+                    return;
                 if(messageType.equals(REMOVED))
-                    chunk.decrNetworkCopy();
+                    chunk.remNetworkCopy(senderId);
                 else if(messageType.equals(STORED))
-                    chunk.incNetworkCopy();
+                    chunk.addNetworkCopy(senderId);
             } catch (ChunkException e) {
+                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
         }

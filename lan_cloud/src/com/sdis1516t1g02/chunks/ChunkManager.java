@@ -25,7 +25,7 @@ public class ChunkManager {
         return fileId+"_"+chunkNo;
     }
 
-    public boolean addChunk(String fileId, int chunkNo, byte[] data, int replicationDegree) throws ChunkException {
+    public boolean addChunk(String fileId, int chunkNo, int replicationDegree, byte[] data) throws ChunkException {
         if(!Server.getInstance().hasSpaceForChunk(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
@@ -60,8 +60,8 @@ public class ChunkManager {
             Chunk chunk = backupFile.chunks.get(key);
             long deletedChunkSize = deleteChunk(chunk);
             if(deletedChunkSize>=0) {
-                chunk.setState(Chunk.State.REMOVED);
-                chunk.networkCopies = 0;
+                chunk.setState(Chunk.State.DELETED);
+                chunk.remNetworkCopy(Server.getInstance().getId());
                 deletedSpace += deletedChunkSize;
             }
         }
@@ -103,7 +103,7 @@ public class ChunkManager {
                 }
             } finally {
                 out.close();
-                chunk.incNetworkCopy();
+                chunk.addNetworkCopy(Server.getInstance().getId());
                 return true;
             }
         } catch (IOException e) {
@@ -147,7 +147,7 @@ public class ChunkManager {
     public long deleteChunk(Chunk chunk) {
         Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName,CHUNK_EXTENSION);
         File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName,CHUNK_EXTENSION);
-        long size = chunkFile.getTotalSpace();
+        long size = chunkFile.length();
         int i;
         for (i = 0; i < 5 ; i++) {
             try{
@@ -191,11 +191,7 @@ public class ChunkManager {
         if(backupFile == null){
             throw new ChunkException("No information about file with fileId="+fileId);
         }
-        Chunk chunk = backupFile.chunks.get(chunkNo);
-        if(chunk == null)
-            throw new ChunkException("No information about chunk");
-
-        return chunk;
+        return backupFile.chunks.get(chunkNo);
     }
 
     public ArrayList<Chunk> getStoredChunks(){
