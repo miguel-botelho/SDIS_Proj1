@@ -17,11 +17,13 @@ import java.util.Hashtable;
  */
 public class FileManager {
     Hashtable<String, String> files = new Hashtable<>();
+    Hashtable<String, Long> sizes = new Hashtable<>();
 
 
-    public String addFile(String filename, String fileid){
+    public String addFile(String filename, String fileid, File file){
         String previousFileId = files.get(filename);
         files.put(filename, fileid);
+        sizes.put(filename,file.length());
         return previousFileId;
     }
 

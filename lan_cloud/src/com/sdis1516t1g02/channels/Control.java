@@ -131,8 +131,7 @@ public class Control extends Channel {
                 chunkNo = splitHeader[4];
                 args= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
-                Restore restore = new Restore(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
-                restore.sendRequestedChunk();
+                Restore.sendRequestedChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);
