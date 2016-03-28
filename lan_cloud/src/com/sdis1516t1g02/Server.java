@@ -4,6 +4,7 @@ import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
 import com.sdis1516t1g02.chunks.ChunkManager;
+import com.sdis1516t1g02.testapp.Peer;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class Server {
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
+    private Peer peer;
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
 
@@ -64,6 +66,7 @@ public class Server {
 		new Thread(this.mc).start();
         new Thread(this.mdb).start();
        	new Thread(this.mdr).start();
+        new Thread(this.peer).start();
     }
 
     public Server(String serverId, String mcAddress, int mcPort, String mdbAddress, int mdbPort, String mdrAddress, int mdrPort) throws IOException {
@@ -76,10 +79,12 @@ public class Server {
             this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
             this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
             this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
+            this.setPeer(new Peer());
 
             new Thread(this.mc).start();
             new Thread(this.mdb).start();
             new Thread(this.mdr).start();
+            new Thread(this.peer).start();
             ourInstance = this;
         }
     }
@@ -106,6 +111,14 @@ public class Server {
 
     public void setMdr(DataRestore mdr) {
         this.mdr = mdr;
+    }
+
+    public Peer getPeer() {
+        return peer;
+    }
+
+    public void setPeer(Peer peer) {
+        this.peer = peer;
     }
 
     public long getAvailableSpace() {
