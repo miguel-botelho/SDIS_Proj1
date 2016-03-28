@@ -40,14 +40,16 @@ public class Server {
 	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
 
     public static Server getInstance() {
-        try{
-            if(ourInstance == null)
-                ourInstance  = new Server();
-        } catch (IOException e) {
-            System.out.println("Unable to start server!");
-            e.printStackTrace();
+        synchronized (ourInstance){
+            try{
+                if(ourInstance == null)
+                    ourInstance  = new Server();
+            } catch (IOException e) {
+                System.out.println("Unable to start server!");
+                e.printStackTrace();
+            }
+            return ourInstance;
         }
-        return ourInstance;
     }
 
     private Server() throws IOException {
@@ -63,6 +65,24 @@ public class Server {
 
         this.chunckManager = new ChunkManager();
 
+    }
+
+    public Server(String serverId, String mcAddress, int mcPort, String mdbAddress, int mdbPort, String mdrAddress, int mdrPort) throws IOException {
+        synchronized (ourInstance){
+            if(ourInstance == null){
+                System.out.println("Unable to start another server");
+                return;
+            }
+            this.id = id;
+            this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
+            this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
+            this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
+
+            new Thread(this.mc).start();
+            new Thread(this.mdb).start();
+            new Thread(this.mdr).start();
+            ourInstance = this;
+        }
     }
 
     public Control getMc() {
