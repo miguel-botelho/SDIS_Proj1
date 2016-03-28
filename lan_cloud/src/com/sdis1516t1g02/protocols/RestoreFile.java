@@ -123,7 +123,7 @@ public class RestoreFile implements Observer{
                 synchronized (this.locks.get(chunkNo)){
                     if(this.receivedChunks.get(chunkNo))
                         return;
-                    byte[] data = messageInfo[5].getBytes();
+                    byte[] data = messageInfo[messageInfo.length-1].getBytes();
                     writeChunk(chunkNo,data);
                     this.receivedChunks.set(chunkNo,Boolean.TRUE);
                 }
