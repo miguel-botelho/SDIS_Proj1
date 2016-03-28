@@ -31,11 +31,24 @@ public class Reclaim {
         int i = 0;
         while(reclaimedSpace < space || i < chunks.size()){
             Chunk chunk = chunks.get(i);
+            boolean needsReSendChunk = (chunk.getNumNetworkCopies()-chunk.getReplicationDegree())<=0;
+            byte[] data = new byte[0];
+            if(needsReSendChunk) {
+                try {
+                    data = cm.getChunkData(chunk.getFile().getFileId(), chunk.getChunkNo());
+                } catch (ChunkException e) {
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
             long deletedSpace = cm.deleteChunk(chunk);
             if(deletedSpace > 0){
                 chunk.setChunkAsReclaimed();
                 reclaimedSpace += deletedSpace;
             }
+            if(needsReSendChunk)
+                Server.getInstance().getMdb().sendBackupMessage(chunk.getOriginalServerId(),chunk.getChunkFileName(),chunk.getChunkNo(),chunk.getReplicationDegree(), data);
+
             Server.getInstance().getMc().sendRemovedMessage(chunk.getFile().getFileId(),chunk.getChunkNo());
             i++;
         }
@@ -45,18 +58,13 @@ public class Reclaim {
 
     public static void updateNetworkCopiesOfChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, String[] args){
         if(version >= 1.0){
-            try {
-                Chunk chunk = Server.getInstance().getChunckManager().getChunk(fileId,chunkNo);
-                if(chunk == null)
-                    return;
-                if(messageType.equals(REMOVED))
-                    chunk.remNetworkCopy(senderId);
-                else if(messageType.equals(STORED))
-                    chunk.addNetworkCopy(senderId);
-            } catch (ChunkException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
-            }
+            Chunk chunk = Server.getInstance().getChunckManager().getChunk(fileId,chunkNo);
+            if(chunk == null)
+                return;
+            if(messageType.equals(REMOVED))
+                chunk.remNetworkCopy(senderId);
+            else if(messageType.equals(STORED))
+                chunk.addNetworkCopy(senderId);
         }
     }
 }
