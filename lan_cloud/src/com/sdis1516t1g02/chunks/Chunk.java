@@ -9,6 +9,7 @@ import java.util.ArrayList;
  */
 public class Chunk implements Comparable<Chunk>{
 
+
     public enum State{
         RECLAIMED,STORED, DELETED, NETWORK, BACKUP
     }
@@ -16,10 +17,19 @@ public class Chunk implements Comparable<Chunk>{
     State state = State.NETWORK;
     int chunkNo;
     String chunkFileName;
-    final int replicationDegree;
+    int replicationDegree;
     ArrayList<String> networkCopies = new ArrayList<>();
     BackupFile file;
+    String originalServerId;
 
+
+    public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree, String originalServerId) {
+        this.file = file;
+        this.chunkNo = chunkNo;
+        this.chunkFileName = filename;
+        this.replicationDegree = replicationDegree;
+        this.originalServerId = originalServerId;
+    }
 
     public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree) {
         this.file = file;
@@ -55,6 +65,10 @@ public class Chunk implements Comparable<Chunk>{
 
     public int getReplicationDegree() {
         return replicationDegree;
+    }
+
+    public void setReplicationDegree(int replicationDegree) {
+        this.replicationDegree = replicationDegree;
     }
 
     public ArrayList<String> getNetworkCopies() {
@@ -99,5 +113,19 @@ public class Chunk implements Comparable<Chunk>{
     @Override
     public int compareTo(Chunk o) {
         return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);
+    }
+
+    public String getOriginalServerId() {
+        return originalServerId;
+    }
+
+    public void setOriginalServerId(String originalServerId) {
+        this.originalServerId = originalServerId;
+    }
+
+    public boolean isReclaimed(){
+        synchronized (state){
+            return state.equals(State.RECLAIMED);
+        }
     }
 }

@@ -103,14 +103,19 @@ public class Backup{
     }
 
     public static void receiveChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, int replicationDegree, String[] args, byte[] data){
+        ChunkManager cm = Server.getInstance().getChunckManager();
 
-        try {
-            if(Server.getInstance().getChunckManager().getChunk(fileId,chunkNo).isStored()){
+        Chunk chunk = cm.getChunk(fileId,chunkNo);
+        if(chunk != null){
+            if(chunk.isStored()){
                 Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);
                 return;
             }
-
-            Server.getInstance().getChunckManager().addChunk(fileId,chunkNo,replicationDegree,data);
+            if(chunk.isReclaimed())
+                return;
+        }
+        try {
+            Server.getInstance().getChunckManager().addChunk(fileId,chunkNo,replicationDegree,data, senderId);
             int delay = new Random().nextInt(RESPONSE_MAX_DELAY+1);
             Thread.sleep(delay);
             Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);

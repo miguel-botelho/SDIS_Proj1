@@ -25,7 +25,7 @@ public class ChunkManager {
         return fileId+"_"+chunkNo;
     }
 
-    public boolean addChunk(String fileId, int chunkNo, int replicationDegree, byte[] data) throws ChunkException {
+    public boolean addChunk(String fileId, int chunkNo, int replicationDegree, byte[] data, String originalServerId) throws ChunkException {
         if(!Server.getInstance().hasSpaceForChunk(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         BackupFile backupFile = files.get(fileId);
@@ -34,7 +34,7 @@ public class ChunkManager {
             files.put(fileId, backupFile);
         }
 
-        Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile);
+        Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile, originalServerId);
         return writeChunk(data, chunk);
     }
 
@@ -68,7 +68,7 @@ public class ChunkManager {
         return deletedSpace;
     }
 
-    protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile) throws ChunkException {
+    protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile, String originalServerId) throws ChunkException {
         Chunk chunk;
         chunk = backupFile.chunks.get(new Integer(chunkNo));
         if(chunk != null) {
@@ -77,10 +77,11 @@ public class ChunkManager {
                     throw new ChunkException("Chunk is already stored");
 
             }
+            chunk.setOriginalServerId(originalServerId);
+            chunk.setReplicationDegree(replicationDegree);
         }else{
-            chunk = new Chunk(backupFile, chunkNo,generateFilename(fileId,chunkNo), replicationDegree);
+            chunk = new Chunk(backupFile, chunkNo,generateFilename(fileId,chunkNo), replicationDegree, originalServerId);
         }
-        chunk.setState(Chunk.State.STORED);
         return chunk;
     }
 
@@ -103,6 +104,7 @@ public class ChunkManager {
                 }
             } finally {
                 out.close();
+                chunk.setState(Chunk.State.STORED);
                 chunk.addNetworkCopy(Server.getInstance().getId());
                 return true;
             }
@@ -186,10 +188,10 @@ public class ChunkManager {
         return files;
     }
 
-    public Chunk getChunk(String fileId, int chunkNo) throws ChunkException {
+    public Chunk getChunk(String fileId, int chunkNo){
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
-            throw new ChunkException("No information about file with fileId="+fileId);
+            return null;
         }
         return backupFile.chunks.get(chunkNo);
     }
