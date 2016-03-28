@@ -19,6 +19,8 @@ public class Chunk implements Comparable<Chunk>{
     String chunkFileName;
     int replicationDegree;
     ArrayList<String> networkCopies = new ArrayList<>();
+    Object networkCopiesLock = new Object();
+    Object stateLock = new Object();
     BackupFile file;
     String originalServerId;
 
@@ -54,7 +56,7 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public void setState(State state) {
-        synchronized (this.state){
+        synchronized (stateLock){
             this.state = state;
         }
     }
@@ -76,21 +78,21 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public void addNetworkCopy(String serverId){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             if(!this.networkCopies.contains(serverId))
                 this.networkCopies.add(serverId);
         }
     }
 
     public void remNetworkCopy(String serverId){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             if(this.networkCopies.contains(serverId))
                 this.networkCopies.remove(serverId);
         }
     }
 
     public int getNumNetworkCopies(){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             return this.networkCopies.size();
         }
     }
@@ -105,7 +107,7 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public boolean isStored(){
-        synchronized (state){
+        synchronized (stateLock){
             return state.equals(State.STORED);
         }
     }
@@ -124,7 +126,7 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public boolean isReclaimed(){
-        synchronized (state){
+        synchronized (stateLock){
             return state.equals(State.RECLAIMED);
         }
     }
