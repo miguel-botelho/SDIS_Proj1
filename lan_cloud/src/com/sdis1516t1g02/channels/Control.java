@@ -4,6 +4,7 @@ import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.Deletion;
 import com.sdis1516t1g02.protocols.MessageType;
 import com.sdis1516t1g02.protocols.Reclaim;
+import com.sdis1516t1g02.protocols.Restore;
 
 import java.awt.*;
 import java.io.IOException;
@@ -119,6 +120,19 @@ public class Control extends Channel {
                 args= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
                 Reclaim.updateNetworkCopiesOfChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
+                break;
+            case GETCHUNK:
+                expectedLength = 5;
+                if(splitHeader.length < expectedLength)
+                    throw new MessageException(header,MessageException.ExceptionType.INVALID_NUMBER_FIELDS);
+                fileId = splitHeader[3];
+                if(!isValidFileId(fileId))
+                    throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
+                chunkNo = splitHeader[4];
+                args= new String[splitHeader.length-expectedLength];
+                System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
+                Restore restore = new Restore(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
+                restore.sendRequestedChunk();
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

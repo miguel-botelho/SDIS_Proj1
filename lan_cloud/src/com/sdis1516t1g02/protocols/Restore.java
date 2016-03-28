@@ -19,19 +19,21 @@ public class Restore implements Observer{
     private final String serverId;
     private final String fileId;
     private final int chunkNo;
+    private final String[] args;
 
-    public Boolean alreadySent = false;
+    private Boolean alreadySent = false;
 
 
-    public Restore(MessageType messageType, double version, String serverId, String fileId, int chunkNo){
+    public Restore(MessageType messageType, double version, String serverId, String fileId, int chunkNo, String[] args){
         this.messageType = messageType;
         this.version = version;
         this.serverId = serverId;
         this.fileId = fileId;
         this.chunkNo = chunkNo;
+        this.args = args;
     }
 
-    public void retrieveChunk(){
+    public void sendRequestedChunk(){
         Server.getInstance().getMdr().addObserver(this);
         ChunkManager cm = Server.getInstance().getChunckManager();
         if(version >= 1.0){
