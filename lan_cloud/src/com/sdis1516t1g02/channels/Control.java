@@ -85,6 +85,17 @@ public class Control extends Channel {
         }
     }
 
+    public void sendGetChunkMessage(String fileId, int chunkNo){
+        String header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        try {
+            sendMessage(header);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ChannelException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");

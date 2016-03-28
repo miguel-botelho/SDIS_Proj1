@@ -38,6 +38,7 @@ public class Server {
     private DataBackup mdb;
     private DataRestore mdr;
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
+    private final Object availableSpaceLock = new Object();
 
 
 	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
@@ -114,7 +115,7 @@ public class Server {
     }
 
     public synchronized boolean hasSpaceForChunk(long chunkSize){
-        synchronized (availableSpace){
+        synchronized (availableSpaceLock){
             if (availableSpace >= chunkSize)
                 return true;
             else
@@ -124,7 +125,7 @@ public class Server {
     }
 
     public synchronized boolean allocateSpace(long chunkSize){
-        synchronized (availableSpace) {
+        synchronized (availableSpaceLock) {
             if (hasSpaceForChunk(chunkSize)) {
                 availableSpace -= chunkSize;
                 return true;
@@ -134,7 +135,7 @@ public class Server {
     }
 
     public synchronized void freeSpace(long size){
-        synchronized (availableSpace){
+        synchronized (availableSpaceLock){
             availableSpace += size;
         }
     }
