@@ -1,7 +1,5 @@
 package com.sdis1516t1g02.testapp;
 
-import com.sdis1516t1g02.testapp.RMI_Interface;
-
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -15,10 +13,7 @@ public class Interface {
                 System.out.println("Numero de argumentos incorreto.");
                 return;
             }
-            String peer_ap = args[0];
-            String sub_protocol = args[1];
-            String filename = args[2];
-            String repDegree = null, response = null;
+            String peer_ap = args[0], sub_protocol = args[1], filename = args[2], repDegree = null, response = null;
 
             if (sub_protocol == "BACKUP" || sub_protocol == "BACKUPENH")
                 repDegree = args[3];

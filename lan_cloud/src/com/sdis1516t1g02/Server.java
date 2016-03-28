@@ -70,6 +70,7 @@ public class Server {
         this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
 		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
         this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
+        this.setInterfaceListener(new Interface_Listener(Integer.parseInt(this.id)));
 
 		new Thread(this.mc).start();
         new Thread(this.mdb).start();
