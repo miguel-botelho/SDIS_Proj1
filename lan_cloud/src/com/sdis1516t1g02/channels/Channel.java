@@ -9,11 +9,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.Observable;
 
 /**
  * Created by Duarte on 19/03/2016.
  */
-public abstract class Channel implements Runnable {
+public abstract class Channel extends Observable implements Runnable {
     protected final static String CRLF = "\r\n";
 
     MulticastSocket mSocket;
