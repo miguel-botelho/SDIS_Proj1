@@ -43,12 +43,12 @@ public class ChunkManager implements Serializable {
                 FileOutputStream fileOut = null;
                 ObjectOutputStream out = null;
 
-                fileOut = new FileOutputStream("/tmp/filesChunk.ser");
+                fileOut = new FileOutputStream("/conf/filesChunk.ser");
                 out = new ObjectOutputStream(fileOut);
                 out.writeObject(files);
                 out.close();
                 fileOut.close();
-                System.out.println("Serialized data is saved in /tmp/filesChunk.ser");
+                System.out.println("Serialized data is saved in /conf/filesChunk.ser");
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ public class ChunkManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream("/tmp/filesChunk.ser");
+            FileInputStream fileIn = new FileInputStream("/conf/filesChunk.ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();
             in.close();
