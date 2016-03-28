@@ -4,14 +4,10 @@ import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
 import com.sdis1516t1g02.chunks.ChunkManager;
-import com.sdis1516t1g02.testapp.Peer;
+import com.sdis1516t1g02.testapp.Interface_Listener;
 
-import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.UUID;
 
 /**
  * Created by Duarte on 19/03/2016.
@@ -37,11 +33,22 @@ public class Server {
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
-    private Peer peer;
+    private Interface_Listener interfaceListener;
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
-
 	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+
+    public static void main(String[] args) {
+        if (args.length != 7) {
+            System.out.println("Numero de argumentos errado.");
+            return;
+        }
+        try {
+            Server server = new Server(args[0], args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static Server getInstance() {
         synchronized (ourInstance){
@@ -56,6 +63,7 @@ public class Server {
         }
     }
 
+    @Deprecated
     private Server() throws IOException {
 
         this.id = InetAddress.getLocalHost().getHostName();
@@ -66,10 +74,10 @@ public class Server {
 		new Thread(this.mc).start();
         new Thread(this.mdb).start();
        	new Thread(this.mdr).start();
-        new Thread(this.peer).start();
+        new Thread(this.interfaceListener).start();
     }
 
-    public Server(String serverId, String mcAddress, int mcPort, String mdbAddress, int mdbPort, String mdrAddress, int mdrPort) throws IOException {
+    public Server(String id, String mcAddress, int mcPort, String mdbAddress, int mdbPort, String mdrAddress, int mdrPort) throws IOException {
         synchronized (ourInstance){
             if(ourInstance == null){
                 System.out.println("Unable to start another server");
@@ -79,12 +87,12 @@ public class Server {
             this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
             this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
             this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
-            this.setPeer(new Peer());
+            this.setInterfaceListener(new Interface_Listener(Integer.parseInt(this.id)));
 
             new Thread(this.mc).start();
             new Thread(this.mdb).start();
             new Thread(this.mdr).start();
-            new Thread(this.peer).start();
+            new Thread(this.interfaceListener).start();
             ourInstance = this;
         }
     }
@@ -113,12 +121,12 @@ public class Server {
         this.mdr = mdr;
     }
 
-    public Peer getPeer() {
-        return peer;
+    public Interface_Listener getInterfaceListener() {
+        return interfaceListener;
     }
 
-    public void setPeer(Peer peer) {
-        this.peer = peer;
+    public void setInterfaceListener(Interface_Listener interfaceListener) {
+        this.interfaceListener = interfaceListener;
     }
 
     public long getAvailableSpace() {

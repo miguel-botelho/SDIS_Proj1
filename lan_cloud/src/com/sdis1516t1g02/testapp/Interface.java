@@ -9,8 +9,6 @@ import java.rmi.registry.Registry;
 
 public class Interface {
 
-    final static String REMOTE = "061195";
-
     public static void main(String[] args) {
         try {
             if (args.length < 3 || args.length > 4 || (args.length > 3 && (args[1] != "BACKUP" || args[1] != "BACKUPENH")) ) {
@@ -20,16 +18,15 @@ public class Interface {
             String peer_ap = args[0];
             String sub_protocol = args[1];
             String filename = args[2];
-            String repDegree = null;
-            String response = null;
+            String repDegree = null, response = null;
 
             if (sub_protocol == "BACKUP" || sub_protocol == "BACKUPENH")
                 repDegree = args[3];
 
             Registry registry = null;
-            registry = LocateRegistry.getRegistry(null); // iniciar o rmi
+            registry = LocateRegistry.getRegistry(); // iniciar o rmi
             RMI_Interface rmiInterface = null;
-            rmiInterface = (RMI_Interface) registry.lookup(REMOTE);
+            rmiInterface = (RMI_Interface) registry.lookup(peer_ap);
 
             switch(sub_protocol) {
                 case "BACKUP":

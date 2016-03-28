@@ -1,5 +1,6 @@
 package com.sdis1516t1g02.testapp;
 
+import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.Backup;
 import com.sdis1516t1g02.protocols.Deletion;
 import com.sdis1516t1g02.protocols.Reclaim;
@@ -13,25 +14,30 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * Created by m_bot on 28/03/2016.
  */
-public class Peer implements RMI_Interface, Runnable{
+public class Interface_Listener implements RMI_Interface, Runnable{
 
-    int id;
+    Integer id;
 
-    public Peer(int id) {
+    public Interface_Listener(Integer id) {
         this.id = id;
     }
 
-    final static String REMOTE = "061195";
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     @Override
     public void run() {
         try {
-            Peer peer = new Peer();
             LocateRegistry.createRegistry(1099);
 
-            RMI_Interface rmiInterface = (RMI_Interface) UnicastRemoteObject.exportObject(peer, 0);
+            RMI_Interface rmiInterface = (RMI_Interface) UnicastRemoteObject.exportObject(Server.getInstance().getInterfaceListener(), 0);
             Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(REMOTE, rmiInterface);
+            registry.rebind(Server.getInstance().getInterfaceListener().getId().toString(), rmiInterface);
 
         } catch (RemoteException e) {
             e.printStackTrace();
