@@ -1,7 +1,8 @@
 package com.sdis1516t1g02;
 
-import java.io.File;
-import java.io.IOException;
+import com.sdis1516t1g02.chunks.BackupFile;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,9 +16,45 @@ import java.util.Hashtable;
 /**
  * Created by Duarte on 27/03/2016.
  */
-public class FileManager {
+public class FileManager implements Serializable {
     Hashtable<String, String> files = new Hashtable<>();
 
+    public void serialize() {
+        try {
+            FileOutputStream fileOut = null;
+            ObjectOutputStream out = null;
+
+            fileOut = new FileOutputStream("/tmp/filesFile.ser");
+            out = new ObjectOutputStream(fileOut);
+            out.writeObject(files);
+            out.close();
+            fileOut.close();
+            System.out.println("Serialized data is saved in /tmp/filesFile.ser");
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserialize() {
+        try {
+            FileInputStream fileIn = new FileInputStream("/tmp/filesFile.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            files = (Hashtable<String,String>) in.readObject();
+            in.close();
+            fileIn.close();
+        }catch(IOException i) {
+            i.printStackTrace();
+            return;
+        }catch(ClassNotFoundException c) {
+            System.out.println("FilesFile object not found");
+            c.printStackTrace();
+            return;
+        }
+    }
 
     public String addFile(String filename, String fileid){
         String previousFileId = files.get(filename);

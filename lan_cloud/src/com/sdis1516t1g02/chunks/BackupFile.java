@@ -1,5 +1,6 @@
 package com.sdis1516t1g02.chunks;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
@@ -7,10 +8,11 @@ import java.util.Set;
 /**
  * Created by Duarte on 22/03/2016.
  */
-public class BackupFile {
+public class BackupFile implements Serializable {
     String fileId;
     Hashtable<Integer,Chunk> chunks;
     boolean backedUp = false;
+
     public BackupFile(String fileId) {
         this.fileId = fileId;
         this.chunks = new Hashtable<>();

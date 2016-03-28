@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Created by Duarte on 21/03/2016.
  */
-public class ChunkManager {
+public class ChunkManager implements Serializable {
     public final static String FOLDER_PATH = "chuncks/";
     public final static String CHUNK_EXTENSION=".chunck";
 
@@ -36,6 +36,43 @@ public class ChunkManager {
 
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile);
         return writeChunk(data, chunk);
+    }
+
+    public void serialize() {
+        try {
+                FileOutputStream fileOut = null;
+                ObjectOutputStream out = null;
+
+                fileOut = new FileOutputStream("/tmp/filesChunk.ser");
+                out = new ObjectOutputStream(fileOut);
+                out.writeObject(files);
+                out.close();
+                fileOut.close();
+                System.out.println("Serialized data is saved in /tmp/filesChunk.ser");
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserialize() {
+        try {
+            FileInputStream fileIn = new FileInputStream("/tmp/filesChunk.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            files = (Hashtable<String,BackupFile>) in.readObject();
+            in.close();
+            fileIn.close();
+        }catch(IOException i) {
+            i.printStackTrace();
+            return;
+        }catch(ClassNotFoundException c) {
+            System.out.println("FilesChunk object not found");
+            c.printStackTrace();
+            return;
+        }
     }
 
     public byte[] getChunkData(String fileId, int chunkNo) throws ChunkException {
