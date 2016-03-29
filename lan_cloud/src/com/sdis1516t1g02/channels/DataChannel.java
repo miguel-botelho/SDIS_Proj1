@@ -15,7 +15,7 @@ public abstract class DataChannel extends Channel {
         super(multicastAddress,mport);
     }
     @Override
-    public synchronized void run() {
+    public void run() {
 
         while (true) {
             byte[] buf = new byte[Server.DATA_BUF_SIZE];

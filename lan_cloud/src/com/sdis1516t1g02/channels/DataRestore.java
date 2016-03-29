@@ -15,7 +15,7 @@ public class DataRestore extends DataChannel {
     }
 
     public void sendChunkMessage(String fileId,int chunkNo,byte data[]){
-        String header = buildHeader(MessageType.PUTCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,chunkNo+"");
+        String header = buildHeader(MessageType.CHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,chunkNo+"");
         String message = buildMessage(header, data);
         try {
             sendMessage(message);

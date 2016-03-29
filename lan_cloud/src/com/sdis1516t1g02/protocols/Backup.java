@@ -69,6 +69,7 @@ public class Backup{
         BackupFile backupFile = new BackupFile(fileId,true);
         cm.getFiles().put(fileId,backupFile);
 
+
         return sendBackupFile(replicationDegree, backupFile, file);
     }
 

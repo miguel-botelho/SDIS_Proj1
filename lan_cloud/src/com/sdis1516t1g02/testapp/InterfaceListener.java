@@ -4,6 +4,7 @@ import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.Backup;
 import com.sdis1516t1g02.protocols.Deletion;
 import com.sdis1516t1g02.protocols.Reclaim;
+import com.sdis1516t1g02.protocols.Restore;
 
 import java.io.FileNotFoundException;
 import java.rmi.RemoteException;
@@ -62,7 +63,10 @@ public class InterfaceListener implements RMI_Interface, Runnable{
 
     @Override
     public String restore(String filename, Boolean enhancement) throws RemoteException {
-        return null;
+        if (enhancement)
+            return null;
+        else
+            return String.valueOf(Restore.restoreFile(filename));
     }
 
     @Override

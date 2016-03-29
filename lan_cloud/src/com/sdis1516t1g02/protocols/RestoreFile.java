@@ -6,6 +6,7 @@ import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.chunks.BackupFile;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,19 +48,31 @@ public class RestoreFile implements Observer{
         ChunkManager cm = Server.getInstance().getChunckManager();
         FileManager fm = Server.getInstance().getFileManager();
         Control mc = Server.getInstance().getMc();
-
-        BackupFile backupFile = cm.getFiles().get(filename);
+        String fileId = fm.getFileId(filename);
+        BackupFile backupFile = cm.getFiles().get(fileId);
         if(backupFile == null)
             return false;
 
         int numChunks = backupFile.getChunks().size();
         initLists(numChunks);
 
+        if(!file.exists()){
+            if(file.getParentFile() !=null)
+                if(!file.getParentFile().exists())
+                    file.getParentFile().mkdirs();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             randomAccessFile = new RandomAccessFile(file,"rw");
-            Server.getInstance().getMdb().addObserver(this);
+            Server.getInstance().getMdr().addObserver(this);
 
             for (int i = 0; i < numChunks; i++) {
+                System.out.println("Requesting chunkNo: "+i);
                 mc.sendGetChunkMessage(fileId,i);
             }
             lock.lock();
@@ -95,6 +108,7 @@ public class RestoreFile implements Observer{
             long position = chunkNo*Server.CHUNK_SIZE;
             try {
                 randomAccessFile.seek(position);
+                randomAccessFile.write(data);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -102,10 +116,8 @@ public class RestoreFile implements Observer{
     }
 
     private void initLists(int numChunks) {
-        receivedChunks = new ArrayList<>(numChunks);
-        Collections.fill(receivedChunks,Boolean.FALSE);
-        locks = new ArrayList<>(numChunks);
-        Collections.fill(locks, new Object());
+        receivedChunks = new ArrayList<>(Collections.nCopies(10,Boolean.FALSE));
+        locks = new ArrayList<>(Collections.nCopies(10,new Object()));
     }
 
     @Override
@@ -120,10 +132,12 @@ public class RestoreFile implements Observer{
 
         if(version >= 1.0){
             if(fileId.equals(this.fileId)) {
+                System.out.println("Received restored chunk:" +chunkNo);
                 synchronized (this.locks.get(chunkNo)){
                     if(this.receivedChunks.get(chunkNo))
                         return;
                     byte[] data = messageInfo[messageInfo.length-1].getBytes();
+                    System.out.println("Writing chunkNo: "+chunkNo);
                     writeChunk(chunkNo,data);
                     this.receivedChunks.set(chunkNo,Boolean.TRUE);
                 }

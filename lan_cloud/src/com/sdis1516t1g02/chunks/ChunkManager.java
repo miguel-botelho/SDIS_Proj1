@@ -173,21 +173,21 @@ public class ChunkManager implements Serializable {
             FileInputStream in = new FileInputStream(chunkFile);
             byte data[]= new byte[Server.CHUNK_SIZE];
 
+
             try {
-                java.nio.channels.FileLock lock = in.getChannel().lock();
-                try {
-                    Reader reader = new InputStreamReader(in);
-                    char cbuf[] = new char[Server.CHUNK_SIZE];
-                    reader.read(cbuf);
-                    String dataStr = new String(cbuf);
-                    data = dataStr.getBytes();
-                } finally {
-                    lock.release();
-                }
-            } finally {
-                in.close();
-                return data;
+                Reader reader = new InputStreamReader(in);
+                char cbuf[] = new char[Server.CHUNK_SIZE];
+                int readChars = reader.read(cbuf);
+                System.out.println("Reading chunkNo: "+chunk.chunkNo+" fileId:"+chunk.file.getFileId()+" Size:"+readChars);
+                String dataStr = new String(cbuf,0,readChars);
+                data = dataStr.getBytes();
+                reader.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
+
+            in.close();
+            return data;
         } catch (IOException e) {
             e.printStackTrace();
         }

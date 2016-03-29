@@ -50,7 +50,6 @@ public class RestoreChunk implements Observer {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }catch (ChunkException e) {
-                System.out.println(e.getMessage());
                 e.printStackTrace();
             }
         }
