@@ -16,7 +16,11 @@ public class DataBackup extends DataChannel{
     }
 
     public int sendBackupMessage(String fileId, int chunkNo, int replicationDegree, byte[] data){
-        String header = buildHeader(MessageType.PUTCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId, ""+chunkNo, ""+replicationDegree);
+        return sendBackupMessage(Server.getInstance().getId(),fileId,chunkNo,replicationDegree,data);
+    }
+
+    public int sendBackupMessage(String senderId,String fileId, int chunkNo, int replicationDegree, byte[] data){
+        String header = buildHeader(MessageType.PUTCHUNK.toString(), Server.VERSION, senderId,fileId, ""+chunkNo, ""+replicationDegree);
         String message = header.concat(new String(data));
         int size = -1;
         try {

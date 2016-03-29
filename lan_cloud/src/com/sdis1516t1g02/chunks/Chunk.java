@@ -2,12 +2,14 @@ package com.sdis1516t1g02.chunks;
 
 import com.sdis1516t1g02.Server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Duarte on 22/03/2016.
  */
-public class Chunk implements Comparable<Chunk>{
+public class Chunk implements Comparable<Chunk>, Serializable {
+
 
     public enum State{
         RECLAIMED,STORED, DELETED, NETWORK, BACKUP
@@ -16,10 +18,21 @@ public class Chunk implements Comparable<Chunk>{
     State state = State.NETWORK;
     int chunkNo;
     String chunkFileName;
-    final int replicationDegree;
+    int replicationDegree;
     ArrayList<String> networkCopies = new ArrayList<>();
+    Object networkCopiesLock = new Object();
+    Object stateLock = new Object();
     BackupFile file;
+    String originalServerId;
 
+
+    public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree, String originalServerId) {
+        this.file = file;
+        this.chunkNo = chunkNo;
+        this.chunkFileName = filename;
+        this.replicationDegree = replicationDegree;
+        this.originalServerId = originalServerId;
+    }
 
     public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree) {
         this.file = file;
@@ -44,7 +57,7 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public void setState(State state) {
-        synchronized (this.state){
+        synchronized (stateLock){
             this.state = state;
         }
     }
@@ -57,26 +70,30 @@ public class Chunk implements Comparable<Chunk>{
         return replicationDegree;
     }
 
+    public void setReplicationDegree(int replicationDegree) {
+        this.replicationDegree = replicationDegree;
+    }
+
     public ArrayList<String> getNetworkCopies() {
         return networkCopies;
     }
 
     public void addNetworkCopy(String serverId){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             if(!this.networkCopies.contains(serverId))
                 this.networkCopies.add(serverId);
         }
     }
 
     public void remNetworkCopy(String serverId){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             if(this.networkCopies.contains(serverId))
                 this.networkCopies.remove(serverId);
         }
     }
 
     public int getNumNetworkCopies(){
-        synchronized (networkCopies){
+        synchronized (networkCopiesLock){
             return this.networkCopies.size();
         }
     }
@@ -91,7 +108,7 @@ public class Chunk implements Comparable<Chunk>{
     }
 
     public boolean isStored(){
-        synchronized (state){
+        synchronized (stateLock){
             return state.equals(State.STORED);
         }
     }
@@ -99,5 +116,19 @@ public class Chunk implements Comparable<Chunk>{
     @Override
     public int compareTo(Chunk o) {
         return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);
+    }
+
+    public String getOriginalServerId() {
+        return originalServerId;
+    }
+
+    public void setOriginalServerId(String originalServerId) {
+        this.originalServerId = originalServerId;
+    }
+
+    public boolean isReclaimed(){
+        synchronized (stateLock){
+            return state.equals(State.RECLAIMED);
+        }
     }
 }

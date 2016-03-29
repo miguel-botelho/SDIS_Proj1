@@ -5,15 +5,14 @@ import com.sdis1516t1g02.Server;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.ArrayList;
+import java.util.Observable;
 
 /**
  * Created by Duarte on 19/03/2016.
  */
-public abstract class Channel implements Runnable {
+public abstract class Channel extends Observable implements Runnable {
     protected final static String CRLF = "\r\n";
 
     MulticastSocket mSocket;
@@ -73,6 +72,10 @@ public abstract class Channel implements Runnable {
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);
         return buf.length;
+    }
+
+    protected static String buildMessage(String header, byte[] body){
+        return header.concat(new String (body));
     }
 
     protected static String buildHeader(String... fields){

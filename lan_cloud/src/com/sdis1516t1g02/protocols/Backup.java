@@ -51,19 +51,19 @@ public class Backup{
         int replicationDegree = 3;
 
         String fileId = fm.generateFileId(filename);
-        String previousFileId = (fm.addFile(filename,fileId));
+        File file = new File(filename);
+
+        if(!file.exists()){
+            throw new FileNotFoundException();
+        }
+        String previousFileId = (fm.addFile(filename,fileId, file));
 
         if(previousFileId != null)
             Deletion.deleteFileById(fileId);
 
         BackupFile backupFile = new BackupFile(fileId,true);
         cm.getFiles().put(fileId,backupFile);
-        File file = new File(filename);
 
-        if(!file.exists()){
-            cm.getFiles().remove(fileId);
-            throw new FileNotFoundException();
-        }
         return sendBackupFile(replicationDegree, backupFile, file);
     }
 
@@ -103,14 +103,19 @@ public class Backup{
     }
 
     public static void receiveChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, int replicationDegree, String[] args, byte[] data){
+        ChunkManager cm = Server.getInstance().getChunckManager();
 
-        try {
-            if(Server.getInstance().getChunckManager().getChunk(fileId,chunkNo).isStored()){
+        Chunk chunk = cm.getChunk(fileId,chunkNo);
+        if(chunk != null){
+            if(chunk.isStored()){
                 Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);
                 return;
             }
-
-            Server.getInstance().getChunckManager().addChunk(fileId,chunkNo,replicationDegree,data);
+            if(chunk.isReclaimed())
+                return;
+        }
+        try {
+            Server.getInstance().getChunckManager().addChunk(fileId,chunkNo,replicationDegree,data, senderId);
             int delay = new Random().nextInt(RESPONSE_MAX_DELAY+1);
             Thread.sleep(delay);
             Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);
