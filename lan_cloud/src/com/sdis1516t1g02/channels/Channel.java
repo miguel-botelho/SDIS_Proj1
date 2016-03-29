@@ -1,12 +1,16 @@
 package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
+import com.sun.xml.internal.ws.server.sei.SEIInvokerTube;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardCopyOption;
 import java.util.Observable;
 
 /**
@@ -29,10 +33,11 @@ public abstract class Channel extends Observable implements Runnable {
         this.mport = mport;
     }
 
-    protected void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
-        byte[] message = mpacket.getData();
-
-        String messageStr = new String(message,0,mpacket.getLength());
+    protected synchronized void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
+        //byte[] message = mpacket.getData();
+        System.out.println("Tamanho do packet recebido:"+mpacket.getLength());
+        String messageStr = new String(mpacket.getData(),0,mpacket.getLength(), Server.CHARSET);
+        System.out.println("Tamanho1: "+messageStr.length());
         String splitMessage[] = messageStr.split("\\r\\n\\r\\n",2);
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
@@ -44,7 +49,9 @@ public abstract class Channel extends Observable implements Runnable {
             }*/
             //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
 //            byte[] body = outputStream.toByteArray();
-            byte[] body = splitMessage[1].getBytes();
+            byte[] body = splitMessage[1].getBytes(Server.CHARSET);
+            System.out.println(""+ splitMessage[1].length());
+
             System.out.println("Received message: "+header+" Body: "+body.length);
             handleMessage(header,body);
         } catch (MessageException e) {

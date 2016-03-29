@@ -144,7 +144,7 @@ public class ChunkManager implements Serializable {
                 java.nio.channels.FileLock lock = out.getChannel().lock();
                 try {
                     Writer writer = new OutputStreamWriter(out);
-                    String writeStr = new String(data);
+                    String writeStr = new String(data,Server.CHARSET);
                     writer.write(writeStr);
                     writer.close();
 
@@ -176,11 +176,11 @@ public class ChunkManager implements Serializable {
 
             try {
                 Reader reader = new InputStreamReader(in);
-                char cbuf[] = new char[Server.CHUNK_SIZE];
+                char cbuf[] = new char[Server.CHUNK_SIZE/2];
                 int readChars = reader.read(cbuf);
                 System.out.println("Reading chunkNo: "+chunk.chunkNo+" fileId:"+chunk.file.getFileId()+" Size:"+readChars);
                 String dataStr = new String(cbuf,0,readChars);
-                data = dataStr.getBytes();
+                data = dataStr.getBytes(Server.CHARSET);
                 reader.close();
             } catch (IOException e1) {
                 e1.printStackTrace();

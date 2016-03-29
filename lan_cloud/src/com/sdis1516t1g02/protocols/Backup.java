@@ -87,10 +87,10 @@ public class Backup{
                     for (int i = 0; i < numChunks; i++) {
                         if (fileSize == 0)
                             break;
-                        char cbuf[] = new char[Server.CHUNK_SIZE];
+                        char cbuf[] = new char[Server.CHUNK_SIZE/2];
                         int bytesRead = reader.read(cbuf);
                         String dataStr = new String(cbuf,0,bytesRead);
-                        byte[] data = dataStr.getBytes();
+                        byte[] data = dataStr.getBytes(Server.CHARSET);
                         System.out.println("Going to send chunk: "+i+". Body length:"+data.length);
                         if(!createAndSendChunk(backupFile,i,replicationDegree,data))
                             return false;

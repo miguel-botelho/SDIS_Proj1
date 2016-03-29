@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.UUID;
 
@@ -28,6 +30,7 @@ public class Server {
     public final static int MDB_PORT = 4447;
     public final static String MDR_ADDRESS = "224.0.0.192";
     public final static int MDR_PORT = 4448;
+    public final static Charset CHARSET= StandardCharsets.US_ASCII;
 
     public final static String VERSION = "1.0";
 
