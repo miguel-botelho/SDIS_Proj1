@@ -53,12 +53,13 @@ public class InterfaceListener implements RMI_Interface, Runnable{
             return null;
         else {
             try {
-                Backup.backupFile(filename,repDegree);
+                if (Backup.backupFile(filename,repDegree))
+                    return "File " + filename + " backed up.";
+                else return "Error backing up " + filename;
             } catch (FileNotFoundException e) {
                 return "File does not exist.";
             }
         }
-        return "File " + filename + " backed up.";
     }
 
     @Override
@@ -74,9 +75,11 @@ public class InterfaceListener implements RMI_Interface, Runnable{
 
         if (enhancement)
             return null;
-        else Deletion.deleteFileByName(filename);
-
-        return "File " + filename + " deleted.";
+        else {
+            if (Deletion.deleteFileByName(filename))
+                return "File " + filename + " deleted.";
+            else return "Error deleting file " + filename;
+        }
     }
 
     @Override
@@ -86,6 +89,8 @@ public class InterfaceListener implements RMI_Interface, Runnable{
             return null;
         else resp = Reclaim.reclaimSpace(space);
 
-        return "Space Reclaimed: " + resp;
+        if (resp == 0)
+            return "Error reclaiming space";
+        else return "Space Reclaimed: " + resp;
     }
 }
