@@ -17,10 +17,11 @@ public class ChunkManager implements Serializable {
 
     Hashtable<String,BackupFile> files;
 
+    final String absolutePath = new File("").getAbsolutePath();
+
     public ChunkManager(){
         files = new Hashtable<>();
     }
-
 
 
     public static String generateFilename(String fileId, int chunkNo){
@@ -45,7 +46,7 @@ public class ChunkManager implements Serializable {
                 FileOutputStream fileOut = null;
                 ObjectOutputStream out = null;
 
-                fileOut = new FileOutputStream("/conf/filesChunk.ser");
+                fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
                 out = new ObjectOutputStream(fileOut);
                 out.writeObject(files);
                 out.close();
@@ -62,7 +63,7 @@ public class ChunkManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream("/conf/filesChunk.ser");
+            FileInputStream fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();
             in.close();
