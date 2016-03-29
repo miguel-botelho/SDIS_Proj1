@@ -2,12 +2,13 @@ package com.sdis1516t1g02.chunks;
 
 import com.sdis1516t1g02.Server;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Duarte on 22/03/2016.
  */
-public class Chunk implements Comparable<Chunk>{
+public class Chunk implements Comparable<Chunk>, Serializable {
 
 
     public enum State{
