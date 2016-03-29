@@ -22,6 +22,7 @@ public class RestoreChunk implements Observer {
     private final String[] args;
 
     private Boolean alreadySent = false;
+    private final Object alreadySentLock = new Object();
 
 
     public RestoreChunk(MessageType messageType, double version, String serverId, String fileId, int chunkNo, String[] args){
@@ -41,7 +42,7 @@ public class RestoreChunk implements Observer {
                 byte[] data = cm.getChunkData(fileId,chunkNo);
                 int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);
                 Thread.sleep(delay);
-                synchronized (alreadySent){
+                synchronized (alreadySentLock){
                     if(alreadySent)
                         return;
                 }
@@ -61,7 +62,7 @@ public class RestoreChunk implements Observer {
         MessageType messageType = MessageType.valueOf(messageInfo[0]);
         int chunkNo = Integer.valueOf(messageInfo[1]);
         if(messageType.equals(MessageType.CHUNK) && messageInfo[1].equals(fileId) &&  chunkNo == this.chunkNo){
-            synchronized (alreadySent){
+            synchronized (alreadySentLock){
                 alreadySent = true;
             }
         }
