@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import java.io.File;
 /**
  * Created by m_bot on 24/03/2016.
  */
@@ -16,8 +17,14 @@ public class LoggerServer {
 
     public LoggerServer(String file) {
         try {
+        	File f = new File(file);
+            if(!f.exists()) {
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+            }
+            
             fh = new FileHandler(file);
-
+            
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);

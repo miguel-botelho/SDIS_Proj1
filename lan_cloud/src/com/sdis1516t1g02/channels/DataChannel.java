@@ -20,7 +20,7 @@ public abstract class DataChannel extends Channel {
         while (true) {
             byte[] buf = new byte[Server.DATA_BUF_SIZE];
 
-            DatagramPacket mpacket = new DatagramPacket(buf, buf.length);
+            final DatagramPacket mpacket = new DatagramPacket(buf, buf.length);
             try {
                 this.mSocket.receive(mpacket);
                 new Thread(new Runnable() {

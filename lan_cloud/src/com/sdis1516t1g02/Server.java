@@ -42,19 +42,19 @@ public class Server {
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
 
 
-	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
+	private final static LoggerServer logger = new LoggerServer("logs/server.log");
 
     public static Server getInstance() {
-        synchronized (ourInstance){
-            try{
-                if(ourInstance == null)
-                    ourInstance  = new Server();
-            } catch (IOException e) {
-                System.out.println("Unable to start server!");
-                e.printStackTrace();
-            }
-            return ourInstance;
+
+        try{
+            if(ourInstance == null)
+                ourInstance  = new Server();
+        } catch (IOException e) {
+            System.out.println("Unable to start server!");
+            e.printStackTrace();
         }
+        return ourInstance;
+
     }
 
     private Server() throws IOException {
@@ -71,23 +71,22 @@ public class Server {
     }
 
     public Server(int serverId, String mcAddress, int mcPort, String mdbAddress, int mdbPort, String mdrAddress, int mdrPort) throws IOException {
-        synchronized (ourInstance){
-            if(ourInstance == null){
-                System.out.println("Unable to start another server");
-                return;
-            }
-            this.id = id;
-            this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
-            this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
-            this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
-            this.setInterfaceListener(new InterfaceListener(serverId));
 
-            new Thread(this.mc).start();
-            new Thread(this.mdb).start();
-            new Thread(this.mdr).start();
-            new Thread(this.interfaceListener).start();
-            ourInstance = this;
+        if(ourInstance != null){
+            System.out.println("Unable to start another server");
+            return;
         }
+        this.id = id;
+        this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
+        this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
+        this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
+        this.setInterfaceListener(new InterfaceListener(serverId));
+
+        new Thread(this.mc).start();
+        new Thread(this.mdb).start();
+        new Thread(this.mdr).start();
+        new Thread(this.interfaceListener).start();
+        ourInstance = this;
     }
 
     public Control getMc() {
@@ -170,5 +169,34 @@ public class Server {
 
     public FileManager getFileManager() {
         return fileManager;
+    }
+    
+    public static void main(String[] args){
+    	if(args.length < 7){
+    		System.out.println("Illegal number of arguments. <SERVER_ID> <MC_ADDRESS> <MC_PORT> <MDB_ADDRESS> <MDB_PORT> <MDR_ADDRESS> <MDR_PORT>");
+    		return;
+    	}
+    	int id = Integer.valueOf(args[0]);
+    	String mcAddress = args[1];
+    	int mcPort = Integer.valueOf(args[2]);
+    	String mdbAddress = args[3];
+    	int mdbPort = Integer.valueOf(args[4]);
+    	String mdrAddress = args[5];
+    	int mdrPort = Integer.valueOf(args[6]);
+    	
+    	try {
+			Server server = new Server(id, mcAddress, mcPort, mdbAddress, mdbPort, mdrAddress, mdrPort);
+			synchronized(server){
+				while(true){
+					server.wait();
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }
