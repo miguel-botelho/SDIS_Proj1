@@ -51,19 +51,19 @@ public class Backup{
         int replicationDegree = 3;
 
         String fileId = fm.generateFileId(filename);
-        String previousFileId = (fm.addFile(filename,fileId));
+        File file = new File(filename);
+
+        if(!file.exists()){
+            throw new FileNotFoundException();
+        }
+        String previousFileId = (fm.addFile(filename,fileId, file));
 
         if(previousFileId != null)
             Deletion.deleteFileById(fileId);
 
         BackupFile backupFile = new BackupFile(fileId,true);
         cm.getFiles().put(fileId,backupFile);
-        File file = new File(filename);
 
-        if(!file.exists()){
-            cm.getFiles().remove(fileId);
-            throw new FileNotFoundException();
-        }
         return sendBackupFile(replicationDegree, backupFile, file);
     }
 
