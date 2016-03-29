@@ -44,6 +44,7 @@ public abstract class Channel extends Observable implements Runnable {
             }
             //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
             byte[] body = outputStream.toByteArray();
+            System.out.println("Received message: "+header+" Body: "+body.length);
             handleMessage(header,body);
         } catch (MessageException e) {
             e.printStackTrace();
@@ -53,11 +54,11 @@ public abstract class Channel extends Observable implements Runnable {
         }
     }
 
-    public boolean isValidVersionNumber(String versionNumber){
+    public static boolean isValidVersionNumber(String versionNumber){
         return versionNumber.matches("\\d\\.\\d");
     }
 
-    public boolean isValidFileId(String fileId){
+    public static boolean isValidFileId(String fileId){
         return fileId.length() == 64;
     }
 

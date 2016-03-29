@@ -52,7 +52,7 @@ public class InterfaceListener implements RMI_Interface, Runnable{
             return null;
         else {
             try {
-                Backup.backupFile(filename); //TODO FALTA ENVIAR A repDegree
+                Backup.backupFile(filename,repDegree);
             } catch (FileNotFoundException e) {
                 return "File does not exist.";
             }

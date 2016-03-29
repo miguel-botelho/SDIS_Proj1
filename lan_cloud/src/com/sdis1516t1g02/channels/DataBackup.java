@@ -25,7 +25,9 @@ public class DataBackup extends DataChannel{
         int size = -1;
         try {
             size = sendMessage(message);
+            System.out.println("Sent Backup Message: "+header +" Body size: "+data.length);
         } catch (ChannelException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

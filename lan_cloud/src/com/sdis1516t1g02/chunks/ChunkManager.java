@@ -3,6 +3,7 @@ package com.sdis1516t1g02.chunks;
 import com.sdis1516t1g02.Server;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -38,6 +39,7 @@ public class ChunkManager implements Serializable {
         }
 
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile, originalServerId);
+        backupFile.getChunksTable().put(chunkNo,chunk);
         return writeChunk(data, chunk);
     }
 
@@ -130,14 +132,21 @@ public class ChunkManager implements Serializable {
         if(!Server.getInstance().allocateSpace(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         try {
-            if(!chunkFile.createNewFile())
+            if(!chunkFile.getParentFile().exists())
+                chunkFile.getParentFile().mkdirs();
+            if(chunkFile.exists()){
                 throw new ChunkException("Chunk file was already stored but there was no record");
+            }
+            chunkFile.createNewFile();
+
             FileOutputStream out = new FileOutputStream(chunkFile);
             try {
                 java.nio.channels.FileLock lock = out.getChannel().lock();
                 try {
                     Writer writer = new OutputStreamWriter(out);
-                    writer.write(new String(data));
+                    String writeStr = new String(data);
+                    writer.write(writeStr);
+                    writer.close();
 
                 } finally {
                     lock.release();
@@ -168,7 +177,7 @@ public class ChunkManager implements Serializable {
                 java.nio.channels.FileLock lock = in.getChannel().lock();
                 try {
                     Reader reader = new InputStreamReader(in);
-                    char cbuf[] = new char[Server.CHUNK_SIZE/2];
+                    char cbuf[] = new char[Server.CHUNK_SIZE];
                     reader.read(cbuf);
                     String dataStr = new String(cbuf);
                     data = dataStr.getBytes();

@@ -34,7 +34,7 @@ public class Server {
     private static Server ourInstance;
     private final ChunkManager chunckManager = new ChunkManager();
     private final FileManager fileManager = new FileManager();
-    private String id;
+    private int id;
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
@@ -59,7 +59,7 @@ public class Server {
 
     private Server() throws IOException {
 
-        this.id = InetAddress.getLocalHost().getHostName();
+        this.id = new Random().nextInt(4000);
         this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
 		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
         this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
@@ -76,7 +76,7 @@ public class Server {
             System.out.println("Unable to start another server");
             return;
         }
-        this.id = id;
+        this.id = serverId;
         this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
         this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
         this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
@@ -160,7 +160,7 @@ public class Server {
     }
 
     public String getId() {
-        return id;
+        return id+"";
     }
 
     public ChunkManager getChunckManager() {
