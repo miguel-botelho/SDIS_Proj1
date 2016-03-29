@@ -33,12 +33,11 @@ public class Server {
     private static Server ourInstance;
     private final ChunkManager chunckManager = new ChunkManager();
     private final FileManager fileManager = new FileManager();
-    private int id;
+    private String id;
     private Control mc;
     private DataBackup mdb;
     private DataRestore mdr;
     private Long availableSpace = (long) (1024 * 1024 * 1024); //1GB
-    private final Object availableSpaceLock = new Object();
 
 
 	private final static LoggerServer logger = new LoggerServer("lan_cloud/logs/server.log");
@@ -58,7 +57,7 @@ public class Server {
 
     private Server() throws IOException {
 
-        this.id = new Random().nextInt(4000);
+        this.id = InetAddress.getLocalHost().getHostName();
         this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
 		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
         this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
@@ -74,7 +73,7 @@ public class Server {
                 System.out.println("Unable to start another server");
                 return;
             }
-            this.id = serverId;
+            this.id = id;
             this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
             this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
             this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
@@ -115,7 +114,7 @@ public class Server {
     }
 
     public synchronized boolean hasSpaceForChunk(long chunkSize){
-        synchronized (availableSpaceLock){
+        synchronized (availableSpace){
             if (availableSpace >= chunkSize)
                 return true;
             else
@@ -125,7 +124,7 @@ public class Server {
     }
 
     public synchronized boolean allocateSpace(long chunkSize){
-        synchronized (availableSpaceLock) {
+        synchronized (availableSpace) {
             if (hasSpaceForChunk(chunkSize)) {
                 availableSpace -= chunkSize;
                 return true;
@@ -135,7 +134,7 @@ public class Server {
     }
 
     public synchronized void freeSpace(long size){
-        synchronized (availableSpaceLock){
+        synchronized (availableSpace){
             availableSpace += size;
         }
     }
@@ -149,7 +148,7 @@ public class Server {
     }
 
     public String getId() {
-        return id+"";
+        return id;
     }
 
     public ChunkManager getChunckManager() {
