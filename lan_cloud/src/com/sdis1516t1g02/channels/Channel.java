@@ -33,25 +33,26 @@ public abstract class Channel extends Observable implements Runnable {
         byte[] message = mpacket.getData();
 
         String messageStr = new String(message,0,mpacket.getLength());
-        String splitMessage[] = messageStr.split("\\r\\n");
+        String splitMessage[] = messageStr.split("\\r\\n\\r\\n",2);
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
         String header = splitMessage[0];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            for(int i = 1; i < splitMessage.length; i++){
+            /*for(int i = 1; i < splitMessage.length; i++){
                 outputStream.write(splitMessage[i].getBytes());
-            }
+            }*/
             //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
-            byte[] body = outputStream.toByteArray();
+//            byte[] body = outputStream.toByteArray();
+            byte[] body = splitMessage[1].getBytes();
             System.out.println("Received message: "+header+" Body: "+body.length);
             handleMessage(header,body);
         } catch (MessageException e) {
             e.printStackTrace();
             throw new ChannelException(e);
-        } catch (IOException e) {
+        } /*catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public static boolean isValidVersionNumber(String versionNumber){
