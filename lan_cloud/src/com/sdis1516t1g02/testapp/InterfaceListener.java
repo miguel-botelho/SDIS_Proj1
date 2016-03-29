@@ -14,13 +14,13 @@ import java.rmi.server.UnicastRemoteObject;
 /**
  * Created by m_bot on 28/03/2016.
  */
-public class Interface_Listener implements RMI_Interface, Runnable{
+public class InterfaceListener implements RMI_Interface, Runnable{
 
     public final Integer PORT_RMI = 1099;
 
     Integer id;
 
-    public Interface_Listener(Integer id) {
+    public InterfaceListener(Integer id) {
         this.id = id;
     }
 
