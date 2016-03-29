@@ -74,6 +74,10 @@ public abstract class Channel extends Observable implements Runnable {
         return buf.length;
     }
 
+    protected static String buildMessage(String header, byte[] body){
+        return header.concat(new String (body));
+    }
+
     protected static String buildHeader(String... fields){
         String header="";
         for(String field : fields){
