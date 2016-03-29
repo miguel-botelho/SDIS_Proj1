@@ -25,12 +25,19 @@ public class FileManager implements Serializable {
             FileOutputStream fileOut = null;
             ObjectOutputStream out = null;
 
-            fileOut = new FileOutputStream("/tmp/filesFile.ser");
+            fileOut = new FileOutputStream("/conf/filesFile.ser");
             out = new ObjectOutputStream(fileOut);
             out.writeObject(files);
             out.close();
             fileOut.close();
-            System.out.println("Serialized data is saved in /tmp/filesFile.ser");
+
+            fileOut = new FileOutputStream("/conf/sizesFile.ser");
+            out = new ObjectOutputStream(fileOut);
+            out.writeObject(sizes);
+            out.close();
+            fileOut.close();
+
+            System.out.println("Serialized data is saved in /conf/filesFile.ser and /conf/sizesFile.ser");
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -42,16 +49,23 @@ public class FileManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream("/tmp/filesFile.ser");
+            FileInputStream fileIn = new FileInputStream("/conf/filesFile.ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,String>) in.readObject();
             in.close();
             fileIn.close();
+
+            fileIn = new FileInputStream("/conf/sizesFile.ser");
+            in = new ObjectInputStream(fileIn);
+            sizes = (Hashtable<String,Long>) in.readObject();
+            in.close();
+            fileIn.close();
+
         }catch(IOException i) {
             i.printStackTrace();
             return;
         }catch(ClassNotFoundException c) {
-            System.out.println("FilesFile object not found");
+            System.out.println("filesFile or sizesFile object not found");
             c.printStackTrace();
             return;
         }
