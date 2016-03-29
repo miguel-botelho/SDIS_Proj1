@@ -20,18 +20,20 @@ public class FileManager implements Serializable {
     Hashtable<String, String> files = new Hashtable<>();
     Hashtable<String, Long> sizes = new Hashtable<>();
 
+    final String absolutePath = new File("").getAbsolutePath();
+
     public void serialize() {
         try {
             FileOutputStream fileOut = null;
             ObjectOutputStream out = null;
 
-            fileOut = new FileOutputStream("/conf/filesFile.ser");
+            fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesFile.ser");
             out = new ObjectOutputStream(fileOut);
             out.writeObject(files);
             out.close();
             fileOut.close();
 
-            fileOut = new FileOutputStream("/conf/sizesFile.ser");
+            fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/sizesFile.ser");
             out = new ObjectOutputStream(fileOut);
             out.writeObject(sizes);
             out.close();
@@ -49,13 +51,13 @@ public class FileManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream("/conf/filesFile.ser");
+            FileInputStream fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesFile.ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,String>) in.readObject();
             in.close();
             fileIn.close();
 
-            fileIn = new FileInputStream("/conf/sizesFile.ser");
+            fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/sizesFile.ser");
             in = new ObjectInputStream(fileIn);
             sizes = (Hashtable<String,Long>) in.readObject();
             in.close();
@@ -69,6 +71,14 @@ public class FileManager implements Serializable {
             c.printStackTrace();
             return;
         }
+    }
+
+    public Hashtable<String, Long> getSizes() {
+        return sizes;
+    }
+
+    public Hashtable<String, String> getFiles() {
+        return files;
     }
 
     public String addFile(String filename, String fileid, File file){
