@@ -16,6 +16,8 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class Interface_Listener implements RMI_Interface, Runnable{
 
+    public final Integer PORT_RMI = 1099;
+
     Integer id;
 
     public Interface_Listener(Integer id) {
@@ -33,7 +35,7 @@ public class Interface_Listener implements RMI_Interface, Runnable{
     @Override
     public void run() {
         try {
-            LocateRegistry.createRegistry(1099);
+            LocateRegistry.createRegistry(PORT_RMI);
 
             RMI_Interface rmiInterface = (RMI_Interface) UnicastRemoteObject.exportObject(Server.getInstance().getInterfaceListener(), 0);
             Registry registry = LocateRegistry.getRegistry();
