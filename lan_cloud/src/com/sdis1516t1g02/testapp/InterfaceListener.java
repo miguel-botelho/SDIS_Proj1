@@ -72,7 +72,6 @@ public class InterfaceListener implements RMI_Interface, Runnable{
 
     @Override
     public String delete(String filename, Boolean enhancement) throws RemoteException {
-
         if (enhancement)
             return null;
         else {

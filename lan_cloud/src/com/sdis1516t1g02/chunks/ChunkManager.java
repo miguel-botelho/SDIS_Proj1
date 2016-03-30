@@ -97,9 +97,8 @@ public class ChunkManager implements Serializable {
             return -1;
         }
         long deletedSpace = 0;
-        Set<Integer> keySet = backupFile.chunks.keySet();
-        for(Integer key : keySet){
-            Chunk chunk = backupFile.chunks.get(key);
+        ArrayList<Chunk> chunks= backupFile.getStoredChunks();
+        for(Chunk chunk : chunks){
             long deletedChunkSize = deleteChunk(chunk);
             if(deletedChunkSize>=0) {
                 chunk.setState(Chunk.State.DELETED);
@@ -196,8 +195,8 @@ public class ChunkManager implements Serializable {
 
 
     public long deleteChunk(Chunk chunk) {
-        Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName,CHUNK_EXTENSION);
-        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName,CHUNK_EXTENSION);
+        Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName+CHUNK_EXTENSION);
+        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName+CHUNK_EXTENSION);
         long size = chunkFile.length();
         int i;
         for (i = 0; i < 5 ; i++) {
@@ -205,6 +204,7 @@ public class ChunkManager implements Serializable {
                 try {
                     Files.delete(path);
                     Server.getInstance().freeSpace(size);
+                    chunk.setState(Chunk.State.DELETED);
                 } catch (NoSuchFileException x) {
                     System.err.format("%s: no such" + " file or directory%n", path);
                     throw x;
