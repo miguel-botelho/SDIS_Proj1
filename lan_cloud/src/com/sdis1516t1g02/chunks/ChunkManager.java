@@ -142,11 +142,7 @@ public class ChunkManager implements Serializable {
             try {
                 java.nio.channels.FileLock lock = out.getChannel().lock();
                 try {
-                    Writer writer = new OutputStreamWriter(out);
-                    String writeStr = new String(data,Server.CHARSET);
-                    writer.write(writeStr);
-                    writer.close();
-
+                    out.write(data);
                 } finally {
                     lock.release();
                 }

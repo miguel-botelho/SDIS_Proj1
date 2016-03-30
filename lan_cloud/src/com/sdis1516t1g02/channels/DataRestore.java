@@ -2,6 +2,7 @@ package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.MessageType;
+import com.sdis1516t1g02.testapp.Interface;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -10,13 +11,14 @@ import java.net.InetAddress;
  * Created by Duarte on 19/03/2016.
  */
 public class DataRestore extends DataChannel {
+
     public DataRestore(InetAddress multicastAddress, int mport) throws IOException {
         super(multicastAddress, mport);
     }
 
     public void sendChunkMessage(String fileId,int chunkNo,byte data[]){
         String header = buildHeader(MessageType.CHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,chunkNo+"");
-        String message = buildMessage(header, data);
+        byte[] message = buildMessage(header, data);
         try {
             sendMessage(message);
             System.out.println("Sent Restore Message: "+header.split("\\r\\n\\r\\n")[0] +" Body size: "+data.length);
@@ -48,11 +50,10 @@ public class DataRestore extends DataChannel {
                 if(!isValidFileId(fileId))
                     throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
                 String chunkNo = splitHeader[4];
-                String[] args= new String[splitHeader.length+1];
-                System.arraycopy(splitHeader,0,args,0,splitHeader.length);
-                args[splitHeader.length] = new String(body);
+                MessageData messageData = new MessageData(MessageType.valueOf(messageType), Double.valueOf(version),senderId,fileId, Integer.valueOf(chunkNo),body);
+                System.out.println("Vai notificar");
                 setChanged();
-                notifyObservers(args);
+                notifyObservers(messageData);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

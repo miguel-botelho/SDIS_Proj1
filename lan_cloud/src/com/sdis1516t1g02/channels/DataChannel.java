@@ -41,14 +41,13 @@ public abstract class DataChannel extends Channel {
         }
     }
 
-    protected int sendMessage(String message) throws ChannelException, IOException {
-        byte[] buf = message.getBytes(Server.CHARSET);
-        if (buf.length > Server.DATA_BUF_SIZE)
+    protected int sendMessage(byte[] message) throws ChannelException, IOException {
+        if (message.length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
 
-        DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
+        DatagramPacket datagramPacket = new DatagramPacket(message,message.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);
-        return buf.length;
+        return message.length;
     }
 }

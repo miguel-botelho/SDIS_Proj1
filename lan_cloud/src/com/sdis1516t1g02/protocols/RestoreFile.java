@@ -3,6 +3,8 @@ package com.sdis1516t1g02.protocols;
 import com.sdis1516t1g02.FileManager;
 import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.channels.Control;
+import com.sdis1516t1g02.channels.DataRestore;
+import com.sdis1516t1g02.channels.MessageData;
 import com.sdis1516t1g02.chunks.BackupFile;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
@@ -120,12 +122,14 @@ public class RestoreFile implements Observer{
 
     @Override
     public void update(Observable o, Object arg) {
-        String[] messageInfo = (String[]) arg;
-        MessageType messageType =MessageType.valueOf(messageInfo[0]);
-        double version = Double.valueOf(messageInfo[1]);
-        String senderId = messageInfo[2];
-        String fileId = messageInfo[3];
-        int chunkNo = Integer.valueOf(messageInfo[4]);
+        System.out.println("Received Packet");
+        MessageData messageData = (MessageData) arg;
+        MessageType messageType =messageData.getMessageType();
+        double version = messageData.getVersion();
+        String senderId = messageData.getSenderId();
+        String fileId = messageData.getFileId();
+        int chunkNo = messageData.getChunkNo();
+        byte[] data = messageData.getBody();
 
 
         if(version >= 1.0){
@@ -134,12 +138,10 @@ public class RestoreFile implements Observer{
                 synchronized (this.locks.get(chunkNo)){
                     if(this.receivedChunks.get(chunkNo))
                         return;
-                    byte[] data = messageInfo[messageInfo.length-1].getBytes();
                     System.out.println("Writing chunkNo: "+chunkNo);
                     writeChunk(chunkNo,data);
                     this.receivedChunks.set(chunkNo,Boolean.TRUE);
                 }
-
                 lock.lock();
                 try{
                     notFull.signal();
