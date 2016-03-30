@@ -25,7 +25,6 @@ public class RestoreFile implements Observer{
     String fileId;
     File file;
     long fileSize;
-    RandomAccessFile randomAccessFile;
     private final Object fileLock = new Object();
     ArrayList<Boolean> receivedChunks;
     ArrayList<Object> locks;
@@ -68,7 +67,6 @@ public class RestoreFile implements Observer{
         }
 
         try {
-            randomAccessFile = new RandomAccessFile(file,"rw");
             Server.getInstance().getMdr().addObserver(this);
 
             for (int i = 0; i < numChunks; i++) {
@@ -86,8 +84,6 @@ public class RestoreFile implements Observer{
                 lock.unlock();
             }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -107,8 +103,10 @@ public class RestoreFile implements Observer{
         synchronized (fileLock){
             long position = chunkNo*Server.CHUNK_SIZE;
             try {
+                RandomAccessFile randomAccessFile = new RandomAccessFile(file,"rw");
                 randomAccessFile.seek(position);
                 randomAccessFile.write(data);
+                randomAccessFile.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

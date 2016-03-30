@@ -25,7 +25,7 @@ public class DataBackup extends DataChannel{
         int size = -1;
         try {
             size = sendMessage(message);
-            System.out.println("Sent Backup Message: "+header +" Body size: "+data.length);
+            System.out.println("Sent Backup Message: "+header.split("\\r\\n\\r\\n")[0] +" Body size: "+data.length);
         } catch (ChannelException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -45,6 +45,8 @@ public class DataBackup extends DataChannel{
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
+        System.out.println("Received message: "+header+" Body: "+body.length);
+
         switch (MessageType.valueOf(messageType)){
             case PUTCHUNK:
                 int expectedLength = 6;

@@ -42,10 +42,10 @@ public abstract class DataChannel extends Channel {
     }
 
     protected int sendMessage(String message) throws ChannelException, IOException {
-        if (message.getBytes().length > Server.DATA_BUF_SIZE)
+        byte[] buf = message.getBytes(Server.CHARSET);
+        if (buf.length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
 
-        byte[] buf = message.getBytes();
         DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);

@@ -19,6 +19,7 @@ public class DataRestore extends DataChannel {
         String message = buildMessage(header, data);
         try {
             sendMessage(message);
+            System.out.println("Sent Restore Message: "+header.split("\\r\\n\\r\\n")[0] +" Body size: "+data.length);
         } catch (ChannelException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -37,6 +38,7 @@ public class DataRestore extends DataChannel {
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
+        System.out.println("Received message: "+header+" Body: "+body.length);
         switch (MessageType.valueOf(messageType)){
             case CHUNK:
                 int expectedLength = 5;

@@ -33,7 +33,7 @@ public abstract class Channel extends Observable implements Runnable {
         this.mport = mport;
     }
 
-    protected synchronized void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
+    protected void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
         String messageStr = new String(mpacket.getData(),0,mpacket.getLength(), Server.CHARSET);
         String splitMessage[] = messageStr.split("\\r\\n\\r\\n",2);
 
@@ -41,9 +41,6 @@ public abstract class Channel extends Observable implements Runnable {
         String header = splitMessage[0];
         try {
             byte[] body = splitMessage[1].getBytes(Server.CHARSET);
-            System.out.println(""+ splitMessage[1].length());
-
-            System.out.println("Received message: "+header+" Body: "+body.length);
             handleMessage(header,body);
         } catch (MessageException e) {
             e.printStackTrace();
@@ -62,10 +59,11 @@ public abstract class Channel extends Observable implements Runnable {
     protected abstract void handleMessage(String header, byte[] body) throws MessageException;
 
     protected int sendMessage(String message) throws ChannelException, IOException {
-        if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
+        byte[] buf = message.getBytes(Server.CHARSET);
+        if (buf.length > Server.CONTROL_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.CONTROL_BUF_SIZE+" bytes.");
+        System.out.println("Sent Message: "+message);
 
-        byte[] buf = message.getBytes();
         DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);

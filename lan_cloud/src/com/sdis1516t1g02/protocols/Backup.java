@@ -82,19 +82,14 @@ public class Backup{
         try {
             FileInputStream in = new FileInputStream(file);
             try {
-                java.nio.channels.FileLock lock = null;
-                    Reader reader = new InputStreamReader(in);
-                    for (int i = 0; i < numChunks; i++) {
-                        if (fileSize == 0)
-                            break;
-                        char cbuf[] = new char[Server.CHUNK_SIZE];
-                        int bytesRead = reader.read(cbuf);
-                        String dataStr = new String(cbuf,0,bytesRead);
-                        byte[] data = dataStr.getBytes(Server.CHARSET);
-                        System.out.println("Going to send chunk: "+i+". Body length:"+data.length);
-                        if(!createAndSendChunk(backupFile,i,replicationDegree,data))
-                            return false;
-                    }
+                for (int i = 0; i < numChunks; i++) {
+                    if (fileSize == 0)
+                        break;
+                    byte[] data = new byte[Server.CHUNK_SIZE];
+                    int bytesRead = in.read(data,0, Server.CHUNK_SIZE);
+                    if(!createAndSendChunk(backupFile,i,replicationDegree,data))
+                        return false;
+                }
             } finally {
                 in.close();
             }

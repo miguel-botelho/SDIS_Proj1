@@ -106,6 +106,8 @@ public class Control extends Channel {
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
+        System.out.println("Received message: "+header+" Body: "+body.length);
+
         switch (MessageType.valueOf(messageType)){
             case DELETE:
                 int expectedLength = 4;

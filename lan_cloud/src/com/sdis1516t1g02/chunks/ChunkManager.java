@@ -171,16 +171,9 @@ public class ChunkManager implements Serializable {
                 throw new ChunkException("Chunk file doesn't exist! Chunk-"+chunk.chunkNo +" Path-"+path);
             FileInputStream in = new FileInputStream(chunkFile);
             byte data[]= new byte[Server.CHUNK_SIZE];
-
-
             try {
-                Reader reader = new InputStreamReader(in);
-                char cbuf[] = new char[Server.CHUNK_SIZE];
-                int readChars = reader.read(cbuf);
-                System.out.println("Reading chunkNo: "+chunk.chunkNo+" fileId:"+chunk.file.getFileId()+" Size:"+readChars);
-                String dataStr = new String(cbuf,0,readChars);
-                data = dataStr.getBytes(Server.CHARSET);
-                reader.close();
+                data = new byte[Server.CHUNK_SIZE];
+                int readChars = in.read(data,0,Server.CHUNK_SIZE);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
