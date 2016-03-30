@@ -8,6 +8,7 @@ import com.sdis1516t1g02.chunks.Chunk;
 import com.sdis1516t1g02.chunks.ChunkException;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
@@ -85,8 +86,10 @@ public class Backup{
                 for (int i = 0; i < numChunks; i++) {
                     if (fileSize == 0)
                         break;
-                    byte[] data = new byte[Server.CHUNK_SIZE];
-                    int bytesRead = in.read(data,0, Server.CHUNK_SIZE);
+                    byte[] tempData = new byte[Server.CHUNK_SIZE];
+                    int bytesRead = in.read(tempData,0, Server.CHUNK_SIZE);
+                    byte[] data = new byte[bytesRead];
+                    System.arraycopy(tempData,0,data,0,bytesRead);
                     if(!createAndSendChunk(backupFile,i,replicationDegree,data))
                         return false;
                 }

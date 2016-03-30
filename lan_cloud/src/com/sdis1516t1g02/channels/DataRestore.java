@@ -51,7 +51,6 @@ public class DataRestore extends DataChannel {
                     throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
                 String chunkNo = splitHeader[4];
                 MessageData messageData = new MessageData(MessageType.valueOf(messageType), Double.valueOf(version),senderId,fileId, Integer.valueOf(chunkNo),body);
-                System.out.println("Vai notificar");
                 setChanged();
                 notifyObservers(messageData);
                 break;

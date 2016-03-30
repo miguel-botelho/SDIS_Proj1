@@ -166,14 +166,15 @@ public class ChunkManager implements Serializable {
             if(!chunkFile.exists())
                 throw new ChunkException("Chunk file doesn't exist! Chunk-"+chunk.chunkNo +" Path-"+path);
             FileInputStream in = new FileInputStream(chunkFile);
-            byte data[]= new byte[Server.CHUNK_SIZE];
+            byte tempData[]= new byte[Server.CHUNK_SIZE];
+            byte[] data = null;
             try {
-                data = new byte[Server.CHUNK_SIZE];
-                int readChars = in.read(data,0,Server.CHUNK_SIZE);
+                int bytesRead = in.read(tempData,0,Server.CHUNK_SIZE);
+                data = new byte[bytesRead];
+                System.arraycopy(tempData,0,data,0,bytesRead);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-
             in.close();
             return data;
         } catch (IOException e) {

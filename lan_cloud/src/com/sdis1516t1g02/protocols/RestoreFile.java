@@ -122,7 +122,6 @@ public class RestoreFile implements Observer{
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("Received Packet");
         MessageData messageData = (MessageData) arg;
         MessageType messageType =messageData.getMessageType();
         double version = messageData.getVersion();
@@ -134,11 +133,9 @@ public class RestoreFile implements Observer{
 
         if(version >= 1.0){
             if(fileId.equals(this.fileId)) {
-                System.out.println("Received restored chunk:" +chunkNo);
                 synchronized (this.locks.get(chunkNo)){
                     if(this.receivedChunks.get(chunkNo))
                         return;
-                    System.out.println("Writing chunkNo: "+chunkNo);
                     writeChunk(chunkNo,data);
                     this.receivedChunks.set(chunkNo,Boolean.TRUE);
                 }
