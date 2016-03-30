@@ -87,7 +87,7 @@ public class Backup{
                     for (int i = 0; i < numChunks; i++) {
                         if (fileSize == 0)
                             break;
-                        char cbuf[] = new char[Server.CHUNK_SIZE/2];
+                        char cbuf[] = new char[Server.CHUNK_SIZE];
                         int bytesRead = reader.read(cbuf);
                         String dataStr = new String(cbuf,0,bytesRead);
                         byte[] data = dataStr.getBytes(Server.CHARSET);

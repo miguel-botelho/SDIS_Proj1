@@ -175,7 +175,7 @@ public class ChunkManager implements Serializable {
 
             try {
                 Reader reader = new InputStreamReader(in);
-                char cbuf[] = new char[Server.CHUNK_SIZE/2];
+                char cbuf[] = new char[Server.CHUNK_SIZE];
                 int readChars = reader.read(cbuf);
                 System.out.println("Reading chunkNo: "+chunk.chunkNo+" fileId:"+chunk.file.getFileId()+" Size:"+readChars);
                 String dataStr = new String(cbuf,0,readChars);
