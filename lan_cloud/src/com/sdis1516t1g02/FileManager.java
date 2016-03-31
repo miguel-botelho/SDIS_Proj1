@@ -97,6 +97,17 @@ public class FileManager implements Serializable {
         return (int) Math.ceil((double)length/Server.CHUNK_SIZE);
     }
 
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     public static String generateFileId(String filename) {
         try {
             File file = new File(filename);
@@ -115,7 +126,8 @@ public class FileManager implements Serializable {
 
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] digestedMessage = digest.digest(metadata.getBytes(StandardCharsets.UTF_8));
-            String fileId = new String(digestedMessage);
+            String fileId = bytesToHex(digestedMessage);
+            System.out.println("FileId: "+fileId);
             return fileId;
         } catch (IOException e) {
             e.printStackTrace();

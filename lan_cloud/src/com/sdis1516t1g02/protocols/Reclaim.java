@@ -63,8 +63,9 @@ public class Reclaim {
                 return;
             if(messageType.equals(REMOVED))
                 chunk.remNetworkCopy(senderId);
-            else if(messageType.equals(STORED))
+            else if(messageType.equals(STORED)) {
                 chunk.addNetworkCopy(senderId);
+            }
         }
     }
 }

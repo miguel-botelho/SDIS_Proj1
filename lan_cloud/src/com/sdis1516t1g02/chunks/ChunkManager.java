@@ -3,6 +3,7 @@ package com.sdis1516t1g02.chunks;
 import com.sdis1516t1g02.Server;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -17,10 +18,11 @@ public class ChunkManager implements Serializable {
 
     Hashtable<String,BackupFile> files;
 
+    final String absolutePath = new File("").getAbsolutePath();
+
     public ChunkManager(){
         files = new Hashtable<>();
     }
-
 
 
     public static String generateFilename(String fileId, int chunkNo){
@@ -37,6 +39,7 @@ public class ChunkManager implements Serializable {
         }
 
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile, originalServerId);
+        backupFile.getChunksTable().put(chunkNo,chunk);
         return writeChunk(data, chunk);
     }
 
@@ -45,7 +48,7 @@ public class ChunkManager implements Serializable {
                 FileOutputStream fileOut = null;
                 ObjectOutputStream out = null;
 
-                fileOut = new FileOutputStream("/conf/filesChunk.ser");
+                fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
                 out = new ObjectOutputStream(fileOut);
                 out.writeObject(files);
                 out.close();
@@ -62,7 +65,7 @@ public class ChunkManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream("/conf/filesChunk.ser");
+            FileInputStream fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();
             in.close();
@@ -94,9 +97,8 @@ public class ChunkManager implements Serializable {
             return -1;
         }
         long deletedSpace = 0;
-        Set<Integer> keySet = backupFile.chunks.keySet();
-        for(Integer key : keySet){
-            Chunk chunk = backupFile.chunks.get(key);
+        ArrayList<Chunk> chunks= backupFile.getStoredChunks();
+        for(Chunk chunk : chunks){
             long deletedChunkSize = deleteChunk(chunk);
             if(deletedChunkSize>=0) {
                 chunk.setState(Chunk.State.DELETED);
@@ -129,15 +131,18 @@ public class ChunkManager implements Serializable {
         if(!Server.getInstance().allocateSpace(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         try {
-            if(!chunkFile.createNewFile())
+            if(!chunkFile.getParentFile().exists())
+                chunkFile.getParentFile().mkdirs();
+            if(chunkFile.exists()){
                 throw new ChunkException("Chunk file was already stored but there was no record");
+            }
+            chunkFile.createNewFile();
+
             FileOutputStream out = new FileOutputStream(chunkFile);
             try {
                 java.nio.channels.FileLock lock = out.getChannel().lock();
                 try {
-                    Writer writer = new OutputStreamWriter(out);
-                    writer.write(new String(data));
-
+                    out.write(data);
                 } finally {
                     lock.release();
                 }
@@ -161,23 +166,17 @@ public class ChunkManager implements Serializable {
             if(!chunkFile.exists())
                 throw new ChunkException("Chunk file doesn't exist! Chunk-"+chunk.chunkNo +" Path-"+path);
             FileInputStream in = new FileInputStream(chunkFile);
-            byte data[]= new byte[Server.CHUNK_SIZE];
-
+            byte tempData[]= new byte[Server.CHUNK_SIZE];
+            byte[] data = null;
             try {
-                java.nio.channels.FileLock lock = in.getChannel().lock();
-                try {
-                    Reader reader = new InputStreamReader(in);
-                    char cbuf[] = new char[Server.CHUNK_SIZE/2];
-                    reader.read(cbuf);
-                    String dataStr = new String(cbuf);
-                    data = dataStr.getBytes();
-                } finally {
-                    lock.release();
-                }
-            } finally {
-                in.close();
-                return data;
+                int bytesRead = in.read(tempData,0,Server.CHUNK_SIZE);
+                data = new byte[bytesRead];
+                System.arraycopy(tempData,0,data,0,bytesRead);
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
+            in.close();
+            return data;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -186,8 +185,8 @@ public class ChunkManager implements Serializable {
 
 
     public long deleteChunk(Chunk chunk) {
-        Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName,CHUNK_EXTENSION);
-        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName,CHUNK_EXTENSION);
+        Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName+CHUNK_EXTENSION);
+        File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName+CHUNK_EXTENSION);
         long size = chunkFile.length();
         int i;
         for (i = 0; i < 5 ; i++) {
@@ -195,6 +194,7 @@ public class ChunkManager implements Serializable {
                 try {
                     Files.delete(path);
                     Server.getInstance().freeSpace(size);
+                    chunk.setState(Chunk.State.DELETED);
                 } catch (NoSuchFileException x) {
                     System.err.format("%s: no such" + " file or directory%n", path);
                     throw x;

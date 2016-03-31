@@ -52,7 +52,7 @@ public class Control extends Channel {
     public void sendRemovedMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.REMOVED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
-            sendMessage(header);
+            sendMessage(header.getBytes());
         } catch (ChannelException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -64,7 +64,7 @@ public class Control extends Channel {
     public void sendStoredMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.STORED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
-            sendMessage(header);
+            sendMessage(header.getBytes());
         } catch (ChannelException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -76,7 +76,7 @@ public class Control extends Channel {
     public void sendDeletedMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
-            sendMessage(header);
+            sendMessage(header.getBytes());
         } catch (ChannelException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -88,7 +88,7 @@ public class Control extends Channel {
     public void sendGetChunkMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
-            sendMessage(header);
+            sendMessage(header.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ChannelException e) {
@@ -106,6 +106,8 @@ public class Control extends Channel {
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
+        System.out.println("Received message: "+header+" Body: "+body.length);
+
         switch (MessageType.valueOf(messageType)){
             case DELETE:
                 int expectedLength = 4;

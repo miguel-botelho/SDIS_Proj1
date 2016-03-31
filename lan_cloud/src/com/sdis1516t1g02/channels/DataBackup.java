@@ -3,6 +3,7 @@ package com.sdis1516t1g02.channels;
 import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.Backup;
 import com.sdis1516t1g02.protocols.MessageType;
+import com.sun.media.jfxmedia.track.Track;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,11 +22,14 @@ public class DataBackup extends DataChannel{
 
     public int sendBackupMessage(String senderId,String fileId, int chunkNo, int replicationDegree, byte[] data){
         String header = buildHeader(MessageType.PUTCHUNK.toString(), Server.VERSION, senderId,fileId, ""+chunkNo, ""+replicationDegree);
-        String message = header.concat(new String(data));
+
+        byte[] message = Channel.buildMessage(header,data);
         int size = -1;
         try {
             size = sendMessage(message);
+            System.out.println("Sent Backup Message: "+header.split("\\r\\n\\r\\n")[0] +" Body size: "+data.length);
         } catch (ChannelException e) {
+            System.out.println(e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -43,6 +47,8 @@ public class DataBackup extends DataChannel{
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
+        System.out.println("Received message: "+header+" Body: "+body.length);
+
         switch (MessageType.valueOf(messageType)){
             case PUTCHUNK:
                 int expectedLength = 6;

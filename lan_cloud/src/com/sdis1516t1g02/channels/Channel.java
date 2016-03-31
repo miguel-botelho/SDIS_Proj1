@@ -1,12 +1,16 @@
 package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
+import com.sun.xml.internal.ws.server.sei.SEIInvokerTube;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Observable;
 
 /**
@@ -29,53 +33,88 @@ public abstract class Channel extends Observable implements Runnable {
         this.mport = mport;
     }
 
-    protected void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
-        byte[] message = mpacket.getData();
+    public static String getHeader(byte[] data) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(data);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream));
+        String header;
+        try {
+            header = reader.readLine();
+            System.out.println(header);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
 
-        String messageStr = new String(message,0,mpacket.getLength());
-        String splitMessage[] = messageStr.split("\\r\\n");
+        return header;
+    }
+
+    public static byte[] getBody(byte[] data, int dataLength) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(data);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+        String tempLine = null;
+        int sumLength = 0;
+        int numLines = 0;
+        try {
+            do {
+
+                    tempLine = reader.readLine();
+
+                    sumLength += tempLine.length();
+                    numLines++;
+
+            } while (!tempLine.isEmpty());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int bodyStartIndex = sumLength + numLines * Channel.CRLF.getBytes().length;
+
+        byte[] body = Arrays.copyOfRange(data, bodyStartIndex, dataLength);
+        return body;
+    }
+
+    public static byte[] buildMessage(String header, byte[] body) {
+        byte[] headerByteArray = header.getBytes();
+        byte[] message = new byte[headerByteArray.length + body.length];
+        System.arraycopy(headerByteArray,0,message,0,headerByteArray.length);
+        System.arraycopy(body,0,message,headerByteArray.length,body.length);
+        return message;
+    }
+
+    protected void handleReceivedPacket(DatagramPacket mpacket) throws ChannelException {
+        byte[] data = mpacket.getData();
+        String header = getHeader(data);
+        byte[] body = getBody(data, mpacket.getLength());
 
         //TODO resolver questao de como efectuar quando o header contem várias header lines
-        String header = splitMessage[0];
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
-            for(int i = 1; i < splitMessage.length; i++){
-                outputStream.write(splitMessage[i].getBytes());
-            }
-            //TODO isto pode dar erro quando se recebe uma mensagem de controlo porque não vai ter body
-            byte[] body = outputStream.toByteArray();
             handleMessage(header,body);
         } catch (MessageException e) {
             e.printStackTrace();
             throw new ChannelException(e);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public boolean isValidVersionNumber(String versionNumber){
+    public static boolean isValidVersionNumber(String versionNumber){
         return versionNumber.matches("\\d\\.\\d");
     }
 
-    public boolean isValidFileId(String fileId){
+    public static boolean isValidFileId(String fileId){
         return fileId.length() == 64;
     }
 
     protected abstract void handleMessage(String header, byte[] body) throws MessageException;
 
-    protected synchronized int sendMessage(String message) throws ChannelException, IOException {
-        if (message.getBytes().length > Server.CONTROL_BUF_SIZE)
+    protected int sendMessage(byte[] message) throws ChannelException, IOException {
+        if (message.length > Server.CONTROL_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.CONTROL_BUF_SIZE+" bytes.");
+        System.out.println("Sent Message: "+message);
 
-        byte[] buf = message.getBytes();
-        DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
+        DatagramPacket datagramPacket = new DatagramPacket(message,message.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);
-        return buf.length;
-    }
-
-    protected static String buildMessage(String header, byte[] body){
-        return header.concat(new String (body));
+        return message.length;
     }
 
     protected static String buildHeader(String... fields){

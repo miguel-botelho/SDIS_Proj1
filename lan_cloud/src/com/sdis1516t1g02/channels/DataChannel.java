@@ -15,7 +15,7 @@ public abstract class DataChannel extends Channel {
         super(multicastAddress,mport);
     }
     @Override
-    public synchronized void run() {
+    public void run() {
 
         while (true) {
             byte[] buf = new byte[Server.DATA_BUF_SIZE];
@@ -41,14 +41,13 @@ public abstract class DataChannel extends Channel {
         }
     }
 
-    protected synchronized int sendMessage(String message) throws ChannelException, IOException {
-        if (message.getBytes().length > Server.DATA_BUF_SIZE)
+    protected int sendMessage(byte[] message) throws ChannelException, IOException {
+        if (message.length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
 
-        byte[] buf = message.getBytes();
-        DatagramPacket datagramPacket = new DatagramPacket(buf,buf.length,multicastAddress,mport);
+        DatagramPacket datagramPacket = new DatagramPacket(message,message.length,multicastAddress,mport);
         MulticastSocket socket = new MulticastSocket();
         socket.send(datagramPacket);
-        return buf.length;
+        return message.length;
     }
 }

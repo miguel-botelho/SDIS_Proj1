@@ -5,17 +5,17 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class Interface {
+public class TestApp {
 
     public static void main(String[] args) {
         try {
-            if (args.length < 3 || args.length > 4 || (args.length > 3 && (args[1] != "BACKUP" || args[1] != "BACKUPENH")) ) {
-                System.out.println("Numero de argumentos incorreto.");
+            if (args.length < 3 || args.length > 4 || (args.length > 3 && (!args[1].equals("BACKUP") && !args[1].equals("BACKUPENH"))) ) {
+                System.out.println("Numero de argumentos incorreto. ");
                 return;
             }
             String peer_ap = args[0], sub_protocol = args[1], filename = args[2], repDegree = null, response = null;
 
-            if (sub_protocol == "BACKUP" || sub_protocol == "BACKUPENH")
+            if (sub_protocol.equals("BACKUP") || sub_protocol.equals("BACKUPENH"))
                 repDegree = args[3];
 
             Registry registry = null;
