@@ -212,4 +212,8 @@ public class Server {
         this.chunckManager.serialize();
         this.fileManager.serialize();
     }
+
+    public static double getVERSION() {
+        return Double.valueOf(VERSION);
+    }
 }

@@ -25,11 +25,19 @@ public class Backup{
         Chunk chunk = new Chunk(file, chunkNo,replicationDegree);
         chunk.setState(Chunk.State.BACKUP);
         file.getChunksTable().put(chunkNo,chunk);
+        String serverId = Server.getInstance().getId();
+        return backupChunk(serverId, chunk, data);
+    }
+
+    private static boolean backupChunk(String serverId, Chunk chunk, byte[] data) {
         int timeInterval = TIME_BETWEEN_SEND_CHUNK;
+        int chunkNo = chunk.getChunkNo();
+        String fileId = chunk.getFile().getFileId();
+        int replicationDegree = chunk.getReplicationDegree();
         int networkCopies = chunk.getNumNetworkCopies();
         int i = 0;
         while(networkCopies < replicationDegree && i < TRIES) {
-            Server.getInstance().getMdb().sendBackupMessage(file.getFileId(), chunkNo, replicationDegree, data);
+            Server.getInstance().getMdb().sendBackupMessage(serverId,fileId, chunkNo, replicationDegree, data);
 
             try {
                 Thread.sleep(timeInterval);
@@ -102,6 +110,17 @@ public class Backup{
             e.printStackTrace();
         }
         return true;
+    }
+
+    public static boolean reSendChunk(Chunk chunk){
+        try {
+            byte[] data = Server.getInstance().getChunckManager().getChunkData(chunk.getFile().getFileId(), chunk.getChunkNo());
+            return backupChunk(chunk.getOriginalServerId(),chunk,data);
+
+        } catch (ChunkException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static void receiveChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, int replicationDegree, String[] args, byte[] data){

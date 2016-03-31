@@ -130,4 +130,8 @@ public class Chunk implements Comparable<Chunk>, Serializable {
             return state.equals(State.RECLAIMED);
         }
     }
+
+    public boolean needsResend(){
+        return this.getNumNetworkCopies()-this.replicationDegree<0;
+    }
 }
