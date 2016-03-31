@@ -18,7 +18,7 @@ public class ChunkManager implements Serializable {
 
     Hashtable<String,BackupFile> files;
 
-    private final File file = new File("/conf/filesChunk.ser");
+    private final File file = new File("conf/filesChunk.ser");
 
     public ChunkManager(){
         files = new Hashtable<>();
@@ -215,8 +215,8 @@ public class ChunkManager implements Serializable {
             ObjectOutputStream out = null;
 
             if(!file.exists()){
-                if(file.getParentFile()!=null && file.getParentFile().exists())
-                    file.mkdirs();
+                if(file.getParentFile()!=null && !file.getParentFile().exists())
+                    file.getParentFile().mkdirs();
                 file.createNewFile();
             }
 
@@ -236,6 +236,8 @@ public class ChunkManager implements Serializable {
 
     public void deserialize() {
         try {
+
+
             FileInputStream fileIn = new FileInputStream(file);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();

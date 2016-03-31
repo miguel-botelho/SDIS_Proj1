@@ -20,8 +20,8 @@ public class Chunk implements Comparable<Chunk>, Serializable {
     String chunkFileName;
     int replicationDegree;
     HashSet<String> networkCopies = new HashSet();
-    Object networkCopiesLock = new Object();
-    Object stateLock = new Object();
+    final Integer networkCopiesLock = new Integer(0);
+    final Integer stateLock = new Integer(0);
     BackupFile file;
     String originalServerId;
 
