@@ -66,8 +66,11 @@ public class InterfaceListener implements RMI_Interface, Runnable{
     public String restore(String filename, Boolean enhancement) throws RemoteException {
         if (enhancement)
             return null;
-        else
-            return String.valueOf(Restore.restoreFile(filename));
+        else {
+            if (Restore.restoreFile(filename))
+                return "File " + filename + "restored.";
+            else return "Error restoring file " + filename;
+        }
     }
 
     @Override
