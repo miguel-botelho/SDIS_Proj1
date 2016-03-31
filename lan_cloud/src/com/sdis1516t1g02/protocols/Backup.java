@@ -127,7 +127,32 @@ public class Backup{
         ChunkManager cm = Server.getInstance().getChunckManager();
 
         Chunk chunk = cm.getChunk(fileId,chunkNo);
-        if(version >=1.0) {
+        if(version >=1.2){
+            if (chunk != null) {
+                if (chunk.isStored()) {
+                    Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
+                    return;
+                }
+                if (chunk.isReclaimed())
+                    return;
+                chunk.setReplicationDegree(replicationDegree);
+                chunk.setOriginalServerId(senderId);
+                if(chunk.getNumNetworkCopies()- replicationDegree>=0)
+                    return;
+            }
+            try {
+                Server.getInstance().getChunckManager().addChunk(fileId, chunkNo, replicationDegree, data, senderId);
+                int delay = new Random().nextInt(RESPONSE_MAX_DELAY + 1);
+                Thread.sleep(delay);
+                Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
+            } catch (ChunkException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        } else if(version >=1.0) {
             if (chunk != null) {
                 if (chunk.isStored()) {
                     Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
