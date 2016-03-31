@@ -3,7 +3,7 @@ package com.sdis1516t1g02.chunks;
 import com.sdis1516t1g02.Server;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by Duarte on 22/03/2016.
@@ -19,7 +19,7 @@ public class Chunk implements Comparable<Chunk>, Serializable {
     int chunkNo;
     String chunkFileName;
     int replicationDegree;
-    ArrayList<String> networkCopies = new ArrayList<>();
+    HashSet<String> networkCopies = new HashSet();
     Object networkCopiesLock = new Object();
     Object stateLock = new Object();
     BackupFile file;
@@ -74,14 +74,13 @@ public class Chunk implements Comparable<Chunk>, Serializable {
         this.replicationDegree = replicationDegree;
     }
 
-    public ArrayList<String> getNetworkCopies() {
+    public HashSet<String> getNetworkCopies() {
         return networkCopies;
     }
 
     public void addNetworkCopy(String serverId){
         synchronized (networkCopiesLock){
-            if(!this.networkCopies.contains(serverId))
-                this.networkCopies.add(serverId);
+            this.networkCopies.add(serverId);
         }
     }
 
