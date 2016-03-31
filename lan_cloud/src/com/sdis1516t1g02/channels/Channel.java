@@ -40,7 +40,6 @@ public abstract class Channel extends Observable implements Runnable {
         String header;
         try {
             header = reader.readLine();
-            System.out.println(header);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
