@@ -2,7 +2,6 @@ package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.MessageType;
-import com.sdis1516t1g02.testapp.Interface;
 
 import java.io.IOException;
 import java.net.InetAddress;
