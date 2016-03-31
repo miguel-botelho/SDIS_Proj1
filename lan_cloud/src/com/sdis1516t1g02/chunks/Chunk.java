@@ -16,14 +16,14 @@ public class Chunk implements Comparable<Chunk>, Serializable {
     }
 
     State state = State.NETWORK;
-    int chunkNo;
-    String chunkFileName;
-    int replicationDegree;
     HashSet<String> networkCopies = new HashSet();
     final Integer networkCopiesLock = new Integer(0);
     final Integer stateLock = new Integer(0);
     BackupFile file;
     String originalServerId;
+    int chunkNo;
+    String chunkFileName;
+    int replicationDegree;
 
 
     public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree, String originalServerId) {
@@ -34,7 +34,7 @@ public class Chunk implements Comparable<Chunk>, Serializable {
         this.originalServerId = originalServerId;
     }
 
-    public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree) {
+    public Chunk(BackupFile file, int chunkNo, String filename) {
         this.file = file;
         this.chunkNo = chunkNo;
         this.chunkFileName = filename;

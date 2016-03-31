@@ -1,6 +1,7 @@
 package com.sdis1516t1g02.protocols;
 
 import com.sdis1516t1g02.Server;
+import com.sdis1516t1g02.chunks.BackupFile;
 import com.sdis1516t1g02.chunks.Chunk;
 import com.sdis1516t1g02.chunks.ChunkException;
 import com.sdis1516t1g02.chunks.ChunkManager;
@@ -62,10 +63,17 @@ public class Reclaim {
     }
 
     public static void updateNetworkCopiesOfChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, String[] args){
+        ChunkManager cm = Server.getInstance().getChunckManager();
+        Chunk chunk = cm.getChunk(fileId,chunkNo);
+
         if(version >= 1.0){
-            Chunk chunk = Server.getInstance().getChunckManager().getChunk(fileId,chunkNo);
-            if(chunk == null)
-                return;
+
+            if(chunk == null){
+                BackupFile file = cm.getFiles().get(fileId);
+                if(file== null)
+                    file = new BackupFile(fileId);
+                chunk = new Chunk(file,chunkNo,ChunkManager.generateFilename(file.getFileId(),chunkNo));
+            }
 
             if(messageType.equals(REMOVED)){
                 chunk.remNetworkCopy(senderId);
