@@ -58,9 +58,8 @@ public class RestoreFile implements Observer{
         initLists(numChunks);
 
         if(!file.exists()){
-            if(file.getParentFile() !=null)
-                if(!file.getParentFile().exists())
-                    file.getParentFile().mkdirs();
+            if(file.getParentFile() !=null && !file.getParentFile().exists())
+                file.getParentFile().mkdirs();
             try {
                 file.createNewFile();
             } catch (IOException e) {

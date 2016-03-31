@@ -1,7 +1,5 @@
 package com.sdis1516t1g02;
 
-import com.sdis1516t1g02.chunks.BackupFile;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,28 +16,24 @@ import java.util.Hashtable;
  */
 public class FileManager implements Serializable {
     Hashtable<String, String> files = new Hashtable<>();
-    Hashtable<String, Long> sizes = new Hashtable<>();
-
-    final String absolutePath = new File("").getAbsolutePath();
+    private final File confFile = new File("/conf/filesFile.ser");
 
     public void serialize() {
         try {
             FileOutputStream fileOut = null;
             ObjectOutputStream out = null;
 
-            fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesFile.ser");
+
+            if(!confFile.exists()){
+                if(confFile.getParentFile()!=null && !confFile.getParentFile().exists())
+                    confFile.getParentFile().mkdirs();
+                confFile.createNewFile();
+            }
+            fileOut = new FileOutputStream(confFile);
             out = new ObjectOutputStream(fileOut);
             out.writeObject(files);
             out.close();
             fileOut.close();
-
-            fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/sizesFile.ser");
-            out = new ObjectOutputStream(fileOut);
-            out.writeObject(sizes);
-            out.close();
-            fileOut.close();
-
-            System.out.println("Serialized data is saved in /conf/filesFile.ser and /conf/sizesFile.ser");
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -51,30 +45,19 @@ public class FileManager implements Serializable {
 
     public void deserialize() {
         try {
-            FileInputStream fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesFile.ser");
+            FileInputStream fileIn = new FileInputStream(confFile);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,String>) in.readObject();
             in.close();
             fileIn.close();
-
-            fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/sizesFile.ser");
-            in = new ObjectInputStream(fileIn);
-            sizes = (Hashtable<String,Long>) in.readObject();
-            in.close();
-            fileIn.close();
-
         }catch(IOException i) {
             i.printStackTrace();
             return;
         }catch(ClassNotFoundException c) {
-            System.out.println("filesFile or sizesFile object not found");
+            System.out.println("Configuration file for FileManager not found");
             c.printStackTrace();
             return;
         }
-    }
-
-    public Hashtable<String, Long> getSizes() {
-        return sizes;
     }
 
     public Hashtable<String, String> getFiles() {
@@ -84,7 +67,6 @@ public class FileManager implements Serializable {
     public String addFile(String filename, String fileid, File file){
         String previousFileId = files.get(filename);
         files.put(filename, fileid);
-        sizes.put(filename,file.length());
         return previousFileId;
     }
 

@@ -90,6 +90,7 @@ public abstract class Channel extends Observable implements Runnable {
         //TODO resolver questao de como efectuar quando o header contem várias header lines
         try {
             handleMessage(header,body);
+            Server.getInstance().saveConfigs();
         } catch (MessageException e) {
             e.printStackTrace();
             throw new ChannelException(e);

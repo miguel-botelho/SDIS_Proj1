@@ -202,4 +202,14 @@ public class Server {
 			e.printStackTrace();
 		}
     }
+
+    private void loadConfigs(){
+        this.chunckManager.deserialize();
+        this.fileManager.deserialize();
+    }
+
+    public void saveConfigs() {
+        this.chunckManager.serialize();
+        this.fileManager.serialize();
+    }
 }

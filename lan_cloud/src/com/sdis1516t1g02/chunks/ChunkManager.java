@@ -18,7 +18,7 @@ public class ChunkManager implements Serializable {
 
     Hashtable<String,BackupFile> files;
 
-    final String absolutePath = new File("").getAbsolutePath();
+    private final File file = new File("/conf/filesChunk.ser");
 
     public ChunkManager(){
         files = new Hashtable<>();
@@ -41,43 +41,6 @@ public class ChunkManager implements Serializable {
         Chunk chunk = getNotStoredChunk(fileId, chunkNo, replicationDegree, backupFile, originalServerId);
         backupFile.getChunksTable().put(chunkNo,chunk);
         return writeChunk(data, chunk);
-    }
-
-    public void serialize() {
-        try {
-                FileOutputStream fileOut = null;
-                ObjectOutputStream out = null;
-
-                fileOut = new FileOutputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
-                out = new ObjectOutputStream(fileOut);
-                out.writeObject(files);
-                out.close();
-                fileOut.close();
-                System.out.println("Serialized data is saved in /conf/filesChunk.ser");
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void deserialize() {
-        try {
-            FileInputStream fileIn = new FileInputStream(absolutePath + "/lan_cloud/src/com/sdis1516t1g02/conf/filesChunk.ser");
-            ObjectInputStream in = new ObjectInputStream(fileIn);
-            files = (Hashtable<String,BackupFile>) in.readObject();
-            in.close();
-            fileIn.close();
-        }catch(IOException i) {
-            i.printStackTrace();
-            return;
-        }catch(ClassNotFoundException c) {
-            System.out.println("FilesChunk object not found");
-            c.printStackTrace();
-            return;
-        }
     }
 
     public byte[] getChunkData(String fileId, int chunkNo) throws ChunkException {
@@ -131,7 +94,7 @@ public class ChunkManager implements Serializable {
         if(!Server.getInstance().allocateSpace(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
         try {
-            if(!chunkFile.getParentFile().exists())
+            if(chunkFile.getParentFile()!=null&&!chunkFile.getParentFile().exists())
                 chunkFile.getParentFile().mkdirs();
             if(chunkFile.exists()){
                 throw new ChunkException("Chunk file was already stored but there was no record");
@@ -244,5 +207,47 @@ public class ChunkManager implements Serializable {
         }
 
         return chunksList;
+    }
+
+    public void serialize() {
+        try {
+            FileOutputStream fileOut = null;
+            ObjectOutputStream out = null;
+
+            if(!file.exists()){
+                if(file.getParentFile()!=null && file.getParentFile().exists())
+                    file.mkdirs();
+                file.createNewFile();
+            }
+
+            fileOut = new FileOutputStream(file);
+            out = new ObjectOutputStream(fileOut);
+            out.writeObject(files);
+            out.close();
+            fileOut.close();
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserialize() {
+        try {
+            FileInputStream fileIn = new FileInputStream(file);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            files = (Hashtable<String,BackupFile>) in.readObject();
+            in.close();
+            fileIn.close();
+        }catch(IOException i) {
+            i.printStackTrace();
+            return;
+        }catch(ClassNotFoundException c) {
+            System.out.println("Configuration file for ChunkManager not found");
+            c.printStackTrace();
+            return;
+        }
     }
 }
