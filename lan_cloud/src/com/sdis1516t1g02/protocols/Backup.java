@@ -141,9 +141,9 @@ public class Backup{
                     return;
             }
             try {
-                Server.getInstance().getChunckManager().addChunk(fileId, chunkNo, replicationDegree, data, senderId);
                 int delay = new Random().nextInt(RESPONSE_MAX_DELAY + 1);
                 Thread.sleep(delay);
+                Server.getInstance().getChunckManager().addChunk(fileId, chunkNo, replicationDegree, data, senderId);
                 Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
             } catch (ChunkException e) {
                 System.out.println(e.getMessage());
