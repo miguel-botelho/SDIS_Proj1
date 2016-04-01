@@ -50,7 +50,7 @@ public class Control extends Channel {
 
     //TODO resolver questão de onde devem ser resolvidas as excepções de mandar mensagens
     public void sendRemovedMessage(String fileId, int chunkNo){
-        String header= buildHeader(MessageType.REMOVED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        String header= buildHeader(MessageType.REMOVED.toString(), ""+Server.getVERSION(), Server.getInstance().getId(),fileId,""+chunkNo);
         try {
             sendMessage(header.getBytes());
         } catch (ChannelException e) {
@@ -62,7 +62,7 @@ public class Control extends Channel {
     }
 
     public void sendStoredMessage(String fileId, int chunkNo){
-        String header= buildHeader(MessageType.STORED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        String header= buildHeader(MessageType.STORED.toString(), ""+Server.getVERSION(), Server.getInstance().getId(),fileId,""+chunkNo);
         try {
             sendMessage(header.getBytes());
         } catch (ChannelException e) {
@@ -74,7 +74,7 @@ public class Control extends Channel {
     }
 
     public void sendDeletedMessage(String fileId){
-        String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId);
+        String header= buildHeader(MessageType.DELETE.toString(), ""+Server.getVERSION(), Server.getInstance().getId(),fileId);
         try {
             sendMessage(header.getBytes());
         } catch (ChannelException e) {
@@ -86,8 +86,19 @@ public class Control extends Channel {
     }
 
     public void sendGetChunkMessage(String fileId, int chunkNo){
-        String header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+        String header= buildHeader(MessageType.GETCHUNK.toString(), ""+Server.getVERSION(), Server.getInstance().getId(),fileId,""+chunkNo);
         try {
+            sendMessage(header.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ChannelException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendConfirmDeleteMessage(String fileId){
+        String header=buildHeader(MessageType.CONFIRM_DELETED.toString(),""+Server.getVERSION(),Server.getInstance().getId(),fileId);
+        try{
             sendMessage(header.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
@@ -145,6 +156,17 @@ public class Control extends Channel {
                 args= new String[splitHeader.length-expectedLength];
                 System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
                 Restore.sendRequestedChunk(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,Integer.valueOf(chunkNo),args);
+                break;
+            case CONFIRM_DELETED:
+                expectedLength = 4;
+                if(splitHeader.length < expectedLength)
+                    throw new MessageException(header,MessageException.ExceptionType.INVALID_NUMBER_FIELDS);
+                fileId = splitHeader[3];
+                if(!isValidFileId(fileId))
+                    throw new MessageException(header, MessageException.ExceptionType.FILEID_INVALID_LENGTH);
+                args= new String[splitHeader.length-expectedLength];
+                System.arraycopy(splitHeader,expectedLength,args,0,splitHeader.length-expectedLength);
+                Deletion.handleDeletedConfirmation(MessageType.valueOf(messageType),Double.valueOf(version),senderId,fileId,args);
                 break;
             default:
                 throw new MessageException(header, MessageException.ExceptionType.UNRECOGNIZED_MESSAGE_TYPE);

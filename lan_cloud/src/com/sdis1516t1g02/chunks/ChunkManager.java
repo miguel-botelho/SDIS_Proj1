@@ -69,6 +69,7 @@ public class ChunkManager implements Serializable {
                 deletedSpace += deletedChunkSize;
             }
         }
+        backupFile.deleted = true;
         return deletedSpace;
     }
 
