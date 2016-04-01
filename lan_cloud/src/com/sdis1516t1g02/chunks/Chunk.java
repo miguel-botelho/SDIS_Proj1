@@ -114,8 +114,10 @@ public class Chunk implements Comparable<Chunk>, Serializable {
 
     @Override
     public int compareTo(Chunk o) {
-        return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);
-    }
+        if((this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree)==0){
+            return o.chunkNo - this.chunkNo;
+        }
+        return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);    }
 
     public String getOriginalServerId() {
         return originalServerId;
