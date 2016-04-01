@@ -67,8 +67,8 @@ public class InterfaceListener implements RMI_Interface, Runnable{
         if (enhancement)
             return null;
         else if (Restore.restoreFile(filename))
-            return "File " + filename + "restored.";
-        else return "Error restoring file " + filename + ".";
+            return "File " + filename + " restored.";
+        else return "Error restoring " + filename + ".";
     }
 
     @Override
