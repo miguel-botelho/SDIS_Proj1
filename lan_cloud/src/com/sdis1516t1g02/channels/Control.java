@@ -73,8 +73,8 @@ public class Control extends Channel {
         }
     }
 
-    public void sendDeletedMessage(String fileId, int chunkNo){
-        String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
+    public void sendDeletedMessage(String fileId){
+        String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId);
         try {
             sendMessage(header.getBytes());
         } catch (ChannelException e) {
