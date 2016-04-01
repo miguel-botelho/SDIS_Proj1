@@ -44,16 +44,18 @@ public class Deletion{
         file.setAsDeleted();
         Server.getInstance().getMc().sendDeletedMessage(fileId);
         //Server.getInstance().getChunckManager().getStoredChunks().remove(fileId);
-        long delay = INIT_DELAY;
-        while (!file.areBackupsDeleted()){
-            try {
-                Thread.sleep(delay);
-                Server.getInstance().getMc().sendDeletedMessage(fileId);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if(Server.getVERSION() >= 1.3) {
+            long delay = INIT_DELAY;
+            while (!file.areBackupsDeleted()) {
+                try {
+                    Thread.sleep(delay);
+                    Server.getInstance().getMc().sendDeletedMessage(fileId);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (delay < MAX_DELAY)
+                    delay *= 2;
             }
-            if(delay < MAX_DELAY)
-                delay *= 2;
         }
 
         return true;
