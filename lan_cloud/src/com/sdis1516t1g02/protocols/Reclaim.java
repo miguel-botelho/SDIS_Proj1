@@ -30,7 +30,7 @@ public class Reclaim {
 
         long reclaimedSpace = 0;
         int i = 0;
-        while(reclaimedSpace < space || i < chunks.size()){
+        while(reclaimedSpace < space && i < chunks.size()){
             Chunk chunk = chunks.get(i);
             byte[] data = null;
             boolean needsReSendChunk = (chunk.getNumNetworkCopies()-chunk.getReplicationDegree())<=0;

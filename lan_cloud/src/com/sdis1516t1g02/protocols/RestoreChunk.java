@@ -1,6 +1,7 @@
 package com.sdis1516t1g02.protocols;
 
 import com.sdis1516t1g02.Server;
+import com.sdis1516t1g02.channels.MessageData;
 import com.sdis1516t1g02.chunks.ChunkException;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
@@ -57,10 +58,12 @@ public class RestoreChunk implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        String[] messageInfo = (String[]) arg;
-        MessageType messageType = MessageType.valueOf(messageInfo[0]);
-        int chunkNo = Integer.valueOf(messageInfo[1]);
-        if(messageType.equals(MessageType.CHUNK) && messageInfo[1].equals(fileId) &&  chunkNo == this.chunkNo){
+        MessageData messageData = (MessageData) arg;
+        MessageType messageType = messageData.getMessageType();
+        String fileId = messageData.getFileId();
+        int chunkNo = messageData.getChunkNo();
+
+        if(messageType.equals(MessageType.CHUNK) && fileId.equals(fileId) &&  chunkNo == this.chunkNo){
             synchronized (alreadySentLock){
                 alreadySent = true;
             }
