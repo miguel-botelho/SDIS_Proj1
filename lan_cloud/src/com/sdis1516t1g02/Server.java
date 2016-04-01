@@ -189,6 +189,7 @@ public class Server {
     	
     	try {
 			Server server = new Server(id, mcAddress, mcPort, mdbAddress, mdbPort, mdrAddress, mdrPort);
+            getInstance().loadConfigs();
 			synchronized(server){
 				while(true){
 					server.wait();

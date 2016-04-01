@@ -50,6 +50,8 @@ public class FileManager implements Serializable {
             files = (Hashtable<String,String>) in.readObject();
             in.close();
             fileIn.close();
+        }catch(FileNotFoundException e) {
+            return;
         }catch(IOException i) {
             i.printStackTrace();
             return;

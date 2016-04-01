@@ -235,13 +235,13 @@ public class ChunkManager implements Serializable {
 
     public void deserialize() {
         try {
-
-
             FileInputStream fileIn = new FileInputStream(file);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();
             in.close();
             fileIn.close();
+        }catch(FileNotFoundException e){
+            return;
         }catch(IOException i) {
             i.printStackTrace();
             return;
