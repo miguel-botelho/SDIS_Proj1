@@ -56,7 +56,7 @@ public class ChunkManager implements Serializable {
 
     public long deleteFile(String fileId){
         BackupFile backupFile = files.get(fileId);
-        if(backupFile == null){
+        if(backupFile == null || backupFile.deleted){
             return -1;
         }
         long deletedSpace = 0;
