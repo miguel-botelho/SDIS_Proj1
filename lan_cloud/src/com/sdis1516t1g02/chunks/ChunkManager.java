@@ -158,6 +158,7 @@ public class ChunkManager implements Serializable {
                     Files.delete(path);
                     Server.getInstance().freeSpace(size);
                     chunk.setState(Chunk.State.DELETED);
+                    break;
                 } catch (NoSuchFileException x) {
                     System.err.format("%s: no such" + " file or directory%n", path);
                     throw x;
@@ -177,8 +178,6 @@ public class ChunkManager implements Serializable {
                 }
                 continue;
             }
-
-            break;
         }
         if (i >= 5)
             return -1;
