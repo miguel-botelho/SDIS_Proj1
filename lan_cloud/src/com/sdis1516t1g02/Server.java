@@ -32,7 +32,8 @@ public class Server {
     public final static int MDR_PORT = 4448;
     public final static Charset CHARSET= StandardCharsets.US_ASCII;
 
-    public final static String VERSION = "1.0";
+    public static String VERSION = "1.0";
+    private final static String MAX_VERSION ="1.3";
 
     private static Server ourInstance;
     private final ChunkManager chunckManager = new ChunkManager();
@@ -216,5 +217,11 @@ public class Server {
 
     public static double getVERSION() {
         return Double.valueOf(VERSION);
+    }
+
+    public static void setEnhanceMode(boolean enhancement){
+        if(enhancement){
+            VERSION = MAX_VERSION;
+        }
     }
 }
