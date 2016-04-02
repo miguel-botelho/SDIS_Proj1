@@ -189,6 +189,7 @@ public class Server {
     	
     	try {
 			Server server = new Server(id, mcAddress, mcPort, mdbAddress, mdbPort, mdrAddress, mdrPort);
+            getInstance().loadConfigs();
 			synchronized(server){
 				while(true){
 					server.wait();
@@ -201,5 +202,19 @@ public class Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    }
+
+    private void loadConfigs(){
+        this.chunckManager.deserialize();
+        this.fileManager.deserialize();
+    }
+
+    public void saveConfigs() {
+        this.chunckManager.serialize();
+        this.fileManager.serialize();
+    }
+
+    public static double getVERSION() {
+        return Double.valueOf(VERSION);
     }
 }

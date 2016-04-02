@@ -40,7 +40,6 @@ public abstract class Channel extends Observable implements Runnable {
         String header;
         try {
             header = reader.readLine();
-            System.out.println(header);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -90,6 +89,7 @@ public abstract class Channel extends Observable implements Runnable {
         //TODO resolver questao de como efectuar quando o header contem várias header lines
         try {
             handleMessage(header,body);
+            Server.getInstance().saveConfigs();
         } catch (MessageException e) {
             e.printStackTrace();
             throw new ChannelException(e);

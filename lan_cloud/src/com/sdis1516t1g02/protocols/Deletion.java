@@ -27,15 +27,9 @@ public class Deletion{
 
     public static boolean deleteFileById(String fileId){
         BackupFile file = Server.getInstance().getChunckManager().getFiles().get(fileId);
-        Set<Integer> keys = file.getChunksTable().keySet();
-
-        for(Integer key : keys){
-            Chunk chunk = file.getChunksTable().get(key);
-            chunk.setState(Chunk.State.DELETED);
-            Server.getInstance().getMc().sendDeletedMessage(fileId,chunk.getChunkNo());
-        }
-
-        Server.getInstance().getChunckManager().getStoredChunks().remove(fileId);
+        file.setAsDeleted();
+        Server.getInstance().getMc().sendDeletedMessage(fileId);
+        //Server.getInstance().getChunckManager().getStoredChunks().remove(fileId);
         return true;
     }
 }

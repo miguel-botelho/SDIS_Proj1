@@ -25,11 +25,19 @@ public class Backup{
         Chunk chunk = new Chunk(file, chunkNo,replicationDegree);
         chunk.setState(Chunk.State.BACKUP);
         file.getChunksTable().put(chunkNo,chunk);
+        String serverId = Server.getInstance().getId();
+        return backupChunk(serverId, chunk, data);
+    }
+
+    private static boolean backupChunk(String serverId, Chunk chunk, byte[] data) {
         int timeInterval = TIME_BETWEEN_SEND_CHUNK;
+        int chunkNo = chunk.getChunkNo();
+        String fileId = chunk.getFile().getFileId();
+        int replicationDegree = chunk.getReplicationDegree();
         int networkCopies = chunk.getNumNetworkCopies();
         int i = 0;
         while(networkCopies < replicationDegree && i < TRIES) {
-            Server.getInstance().getMdb().sendBackupMessage(file.getFileId(), chunkNo, replicationDegree, data);
+            Server.getInstance().getMdb().sendBackupMessage(serverId,fileId, chunkNo, replicationDegree, data);
 
             try {
                 Thread.sleep(timeInterval);
@@ -104,28 +112,43 @@ public class Backup{
         return true;
     }
 
+    public static boolean reSendChunk(Chunk chunk){
+        try {
+            byte[] data = Server.getInstance().getChunckManager().getChunkData(chunk.getFile().getFileId(), chunk.getChunkNo());
+            return backupChunk(chunk.getOriginalServerId(),chunk,data);
+
+        } catch (ChunkException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static void receiveChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, int replicationDegree, String[] args, byte[] data){
         ChunkManager cm = Server.getInstance().getChunckManager();
 
         Chunk chunk = cm.getChunk(fileId,chunkNo);
-        if(chunk != null){
-            if(chunk.isStored()){
-                Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);
-                return;
+        if(version >=1.0) {
+            if (chunk != null) {
+                if (chunk.isStored()) {
+                    Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
+                    return;
+                }
+                if (chunk.isReclaimed())
+                    return;
+                chunk.setReplicationDegree(replicationDegree);
+                chunk.setOriginalServerId(senderId);
             }
-            if(chunk.isReclaimed())
-                return;
-        }
-        try {
-            Server.getInstance().getChunckManager().addChunk(fileId,chunkNo,replicationDegree,data, senderId);
-            int delay = new Random().nextInt(RESPONSE_MAX_DELAY+1);
-            Thread.sleep(delay);
-            Server.getInstance().getMc().sendStoredMessage(fileId,chunkNo);
-        } catch (ChunkException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            try {
+                Server.getInstance().getChunckManager().addChunk(fileId, chunkNo, replicationDegree, data, senderId);
+                int delay = new Random().nextInt(RESPONSE_MAX_DELAY + 1);
+                Thread.sleep(delay);
+                Server.getInstance().getMc().sendStoredMessage(fileId, chunkNo);
+            } catch (ChunkException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ package com.sdis1516t1g02.chunks;
 import com.sdis1516t1g02.Server;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Created by Duarte on 22/03/2016.
@@ -16,14 +16,14 @@ public class Chunk implements Comparable<Chunk>, Serializable {
     }
 
     State state = State.NETWORK;
+    HashSet<String> networkCopies = new HashSet();
+    final Integer networkCopiesLock = new Integer(0);
+    final Integer stateLock = new Integer(0);
+    BackupFile file;
+    String originalServerId;
     int chunkNo;
     String chunkFileName;
     int replicationDegree;
-    ArrayList<String> networkCopies = new ArrayList<>();
-    Object networkCopiesLock = new Object();
-    Object stateLock = new Object();
-    BackupFile file;
-    String originalServerId;
 
 
     public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree, String originalServerId) {
@@ -34,7 +34,7 @@ public class Chunk implements Comparable<Chunk>, Serializable {
         this.originalServerId = originalServerId;
     }
 
-    public Chunk(BackupFile file, int chunkNo, String filename, int replicationDegree) {
+    public Chunk(BackupFile file, int chunkNo, String filename) {
         this.file = file;
         this.chunkNo = chunkNo;
         this.chunkFileName = filename;
@@ -74,14 +74,13 @@ public class Chunk implements Comparable<Chunk>, Serializable {
         this.replicationDegree = replicationDegree;
     }
 
-    public ArrayList<String> getNetworkCopies() {
+    public HashSet<String> getNetworkCopies() {
         return networkCopies;
     }
 
     public void addNetworkCopy(String serverId){
         synchronized (networkCopiesLock){
-            if(!this.networkCopies.contains(serverId))
-                this.networkCopies.add(serverId);
+            this.networkCopies.add(serverId);
         }
     }
 
@@ -115,8 +114,10 @@ public class Chunk implements Comparable<Chunk>, Serializable {
 
     @Override
     public int compareTo(Chunk o) {
-        return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);
-    }
+        if((this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree)==0){
+            return o.chunkNo - this.chunkNo;
+        }
+        return (this.networkCopies.size() - this.replicationDegree) - (o.networkCopies.size()-o.replicationDegree);    }
 
     public String getOriginalServerId() {
         return originalServerId;
@@ -130,5 +131,9 @@ public class Chunk implements Comparable<Chunk>, Serializable {
         synchronized (stateLock){
             return state.equals(State.RECLAIMED);
         }
+    }
+
+    public boolean needsResend(){
+        return this.getNumNetworkCopies()-this.replicationDegree<0;
     }
 }

@@ -53,4 +53,13 @@ public class BackupFile implements Serializable {
 
         return retList;
     }
+
+    public void setAsDeleted(){
+        Set<Integer> keys = chunks.keySet();
+        for(Integer key : keys){
+            Chunk chunk = chunks.get(key);
+            chunk.setState(Chunk.State.DELETED);
+        }
+
+    }
 }
