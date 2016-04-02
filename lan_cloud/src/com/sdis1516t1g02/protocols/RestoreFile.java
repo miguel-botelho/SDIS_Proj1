@@ -135,24 +135,31 @@ public class RestoreFile implements Observer{
         int chunkNo = messageData.getChunkNo();
         byte[] data = messageData.getBody();
 
-
-        if(version >= 1.0){
-            if(fileId.equals(this.fileId)) {
-                synchronized (this.locks.get(chunkNo)){
-                    if(this.receivedChunks.get(chunkNo))
-                        return;
-                    writeChunk(chunkNo,data);
-                    this.receivedChunks.set(chunkNo,Boolean.TRUE);
-                }
-                lock.lock();
-                try{
-                    notFull.signal();
-                }finally {
-                    lock.unlock();
-                }
-            }else{
-                return;
+        if(version >= 1.3){
+            if(data.length > 0){
+                handleReceivedChunk(fileId,chunkNo,data);
             }
+        }else if(version >= 1.0){
+            handleReceivedChunk(fileId, chunkNo, data);
+        }
+    }
+
+    private void handleReceivedChunk(String fileId, int chunkNo, byte[] data) {
+        if(fileId.equals(this.fileId)) {
+            synchronized (this.locks.get(chunkNo)){
+                if(this.receivedChunks.get(chunkNo))
+                    return;
+                writeChunk(chunkNo,data);
+                this.receivedChunks.set(chunkNo,Boolean.TRUE);
+            }
+            lock.lock();
+            try{
+                notFull.signal();
+            }finally {
+                lock.unlock();
+            }
+        }else{
+            return;
         }
     }
 }

@@ -10,6 +10,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Created by Duarte on 19/03/2016.
@@ -88,7 +89,11 @@ public class Control extends Channel {
     public void sendGetChunkMessage(String fileId, int chunkNo){
         String header = null;
         if(Server.getVERSION() >= 1.3){
-            header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo,""+Server.getInstance().getTcpChannel().getPort());
+            try {
+                header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo,InetAddress.getLocalHost().getHostAddress(),""+Server.getInstance().getTcpChannel().getPort());
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
         }else if(Server.getVERSION() >=1.0){
             header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         }

@@ -4,6 +4,7 @@ import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.MessageType;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -93,12 +94,13 @@ public class TcpChannel extends Observable implements Runnable {
         }
     }
 
-    //// TODO: 02-04-2016 Acabar
     private void sendMessage(byte[] message, InetAddress address, int port) throws IOException, ChannelException {
         if (message.length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
         Socket socket = new Socket(address,port);
-        socket.getOutputStream().write(message);
+        OutputStream out = socket.getOutputStream();
+        out.write(message);
+        out.flush();
         socket.close();
     }
 
