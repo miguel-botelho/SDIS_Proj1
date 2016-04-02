@@ -50,47 +50,40 @@ public class InterfaceListener implements RMI_Interface, Runnable{
     @Override
     public String backup(String filename, Integer repDegree, Boolean enhancement) throws RemoteException {
         if (enhancement)
-            return null;
-        else {
-            try {
-                if (Backup.backupFile(filename,repDegree))
-                    return "File " + filename + " backed up.";
-                else return "Error backing up " + filename;
-            } catch (FileNotFoundException e) {
-                return "File does not exist.";
-            }
+            Server.getInstance().setEnhanceMode(true);
+        try {
+            if (Backup.backupFile(filename,repDegree))
+                return "File " + filename + " backed up.";
+            else return "Error backing up " + filename;
+        } catch (FileNotFoundException e) {
+            return "File does not exist.";
         }
     }
 
     @Override
     public String restore(String filename, Boolean enhancement) throws RemoteException {
         if (enhancement)
-            return null;
-        else {
-            if (Restore.restoreFile(filename))
-                return "File " + filename + "restored.";
-            else return "Error restoring file " + filename;
-        }
+            Server.getInstance().setEnhanceMode(true);
+        if (Restore.restoreFile(filename))
+            return "File " + filename + "restored.";
+        else return "Error restoring file " + filename;
     }
 
     @Override
     public String delete(String filename, Boolean enhancement) throws RemoteException {
         if (enhancement)
-            return null;
-        else {
-            if (Deletion.deleteFileByName(filename))
-                return "File " + filename + " deleted.";
-            else return "Error deleting file " + filename;
-        }
+            Server.getInstance().setEnhanceMode(true);
+        if (Deletion.deleteFileByName(filename))
+            return "File " + filename + " deleted.";
+        else return "Error deleting file " + filename;
     }
 
     @Override
     public String reclaim(long space, Boolean enhancement) throws RemoteException {
-        long resp = 0;
         if (enhancement)
-            return null;
-        else resp = Reclaim.reclaimSpace(space);
+            Server.getInstance().setEnhanceMode(true);
 
+        long resp = Reclaim.reclaimSpace(space);
         if (resp == 0)
             return "Error reclaiming space";
         else return "Space Reclaimed: " + resp;
