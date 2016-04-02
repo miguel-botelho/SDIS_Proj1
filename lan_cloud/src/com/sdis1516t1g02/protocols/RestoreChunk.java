@@ -38,7 +38,22 @@ public class RestoreChunk implements Observer {
     public void sendRequestedChunk(){
         Server.getInstance().getMdr().addObserver(this);
         ChunkManager cm = Server.getInstance().getChunckManager();
-        if(version >= 1.0){
+        if(version >= 1.3){
+            try {
+                byte[] data = cm.getChunkData(fileId,chunkNo);
+                int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);
+                Thread.sleep(delay);
+                synchronized (alreadySentLock){
+                    if(alreadySent)
+                        return;
+                }
+//                Server.getInstance().getTcpChannel().sendChunkMessage(fileId,chunkNo,data);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }catch (ChunkException e) {
+                e.printStackTrace();
+            }
+        }else if(version >= 1.0){
             try {
                 byte[] data = cm.getChunkData(fileId,chunkNo);
                 int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);

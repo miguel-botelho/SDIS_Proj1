@@ -4,6 +4,7 @@ import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.MessageType;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -78,7 +79,44 @@ public class TcpChannel extends Observable implements Runnable {
 
     }
 
+    public void sendChunkMessage(String fileId, int chunkNo, byte[] data, InetAddress address, int port) {
+        String header = buildHeader(MessageType.CHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,chunkNo+"");
+        byte[] message = buildMessage(header, data);
+        try {
+            sendMessage(message,address,port);
+            System.out.println("Sent Restore Message: "+header.split("\\r\\n\\r\\n")[0] +" Body size: "+data.length);
+        } catch (ChannelException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    //// TODO: 02-04-2016 Acabar
+    private void sendMessage(byte[] message, InetAddress address, int port) throws IOException, ChannelException {
+        if (message.length > Server.DATA_BUF_SIZE)
+            throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");
+        Socket socket = new Socket(address,port);
+        socket.getOutputStream().write(message);
+        socket.close();
+    }
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 
     @Override
     public void run() {
@@ -100,21 +138,5 @@ public class TcpChannel extends Observable implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    public ServerSocket getServerSocket() {
-        return serverSocket;
-    }
-
-    public void setServerSocket(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 }
