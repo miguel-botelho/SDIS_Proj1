@@ -11,11 +11,24 @@ import java.util.Set;
  */
 public class Deletion{
 
+    /**
+     * Deletes a chunk from the system.
+     * @param messageType the type of the message
+     * @param version the version of the message
+     * @param senderId the id of the peer that sent the message
+     * @param fileId the id of the file
+     * @param args
+     */
     public static void deleteChunk(MessageType messageType, double version, String senderId, String fileId, String[] args){
         if(version >= 1.0)
             Server.getInstance().getChunckManager().deleteFile(fileId);
     }
 
+    /**
+     * Deletes a file given his name.
+     * @param filename the name of the file
+     * @return deleteFileById
+     */
     public static boolean deleteFileByName(String filename){
         String fileId = Server.getInstance().getFileManager().getFileId(filename);
         if(fileId == null)
@@ -24,7 +37,11 @@ public class Deletion{
             return deleteFileById(fileId);
     }
 
-
+    /**
+     * Deletes a file given his id.
+     * @param fileId the id of the file
+     * @return true
+     */
     public static boolean deleteFileById(String fileId){
         BackupFile file = Server.getInstance().getChunckManager().getFiles().get(fileId);
         file.setAsDeleted();

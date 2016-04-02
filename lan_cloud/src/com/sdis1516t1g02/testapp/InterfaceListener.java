@@ -17,22 +17,43 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class InterfaceListener implements RMI_Interface, Runnable{
 
+    /**
+     * The port used by the RMI.
+     */
     public final Integer PORT_RMI = 1099;
 
+    /**
+     * The id of the peer.
+     */
     Integer id;
 
+    /**
+     * Creates a new Interface Listener.
+     * @param id
+     */
     public InterfaceListener(Integer id) {
         this.id = id;
     }
 
+    /**
+     * Returns the id of the peer.
+     * @return id
+     */
     public Integer getId() {
         return id;
     }
 
+    /**
+     * Sets the id of the peer.
+     * @param id
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
+    /**
+     * The thread that runs the RMI, connects to it.
+     */
     @Override
     public void run() {
         try {
@@ -47,6 +68,14 @@ public class InterfaceListener implements RMI_Interface, Runnable{
         }
     }
 
+    /**
+     * The implementation of the backup by the interface.
+     * @param filename the name of the file
+     * @param repDegree the replication degree
+     * @param enhancement checks the enhancement
+     * @return message
+     * @throws RemoteException
+     */
     @Override
     public String backup(String filename, Integer repDegree, Boolean enhancement) throws RemoteException {
         if (enhancement)
@@ -60,6 +89,13 @@ public class InterfaceListener implements RMI_Interface, Runnable{
         }
     }
 
+    /**
+     * The implementation of the restore by the interface.
+     * @param filename the name of the file
+     * @param enhancement checks the enhancement
+     * @return message
+     * @throws RemoteException
+     */
     @Override
     public String restore(String filename, Boolean enhancement) throws RemoteException {
         if (enhancement)
@@ -69,6 +105,13 @@ public class InterfaceListener implements RMI_Interface, Runnable{
         else return "Error restoring file " + filename;
     }
 
+    /**
+     * The implementation of the delete by the interface.
+     * @param filename the name of the file
+     * @param enhancement checks the enhancement
+     * @return message
+     * @throws RemoteException
+     */
     @Override
     public String delete(String filename, Boolean enhancement) throws RemoteException {
         if (enhancement)
@@ -78,6 +121,13 @@ public class InterfaceListener implements RMI_Interface, Runnable{
         else return "Error deleting file " + filename;
     }
 
+    /**
+     * The implementation of the reclaim by the interface.
+     * @param space the space to be reclaimed
+     * @param enhancement checks the enhancement
+     * @return message
+     * @throws RemoteException
+     */
     @Override
     public String reclaim(long space, Boolean enhancement) throws RemoteException {
         if (enhancement)
