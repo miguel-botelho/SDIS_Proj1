@@ -69,11 +69,17 @@ public class RestoreFile implements Observer{
 
         try {
             Server.getInstance().getMdr().addObserver(this);
+            if(Server.getVERSION() >=1.3){
+                Server.getInstance().getTcpChannel().addObserver(this);
+            }
 
             for (int i = 0; i < numChunks; i++) {
                 System.out.println("Requesting chunkNo: "+i);
                 mc.sendGetChunkMessage(fileId,i);
             }
+
+
+
             lock.lock();
             try {
                 for (int i = 0; i < 2*numChunks; i++) {
