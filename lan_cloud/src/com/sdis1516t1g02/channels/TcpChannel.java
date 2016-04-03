@@ -44,7 +44,7 @@ public class TcpChannel extends Observable implements Runnable {
                 if (b == -1) {
                     break;
                 }
-                bytesRead += b;
+                bytesRead++;
                 bf.put( (byte) b);
             }
             socket.close();
