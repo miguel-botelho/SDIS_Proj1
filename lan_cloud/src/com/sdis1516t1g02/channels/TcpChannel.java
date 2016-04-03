@@ -39,7 +39,7 @@ public class TcpChannel extends Observable implements Runnable {
             byte[] data = new byte[bytesRead];
             System.arraycopy(tempData,0,data,0,bytesRead);
             String header = getHeader(data);
-            byte[] body = getBody(data, socket.getReceiveBufferSize());
+            byte[] body = getBody(data, bytesRead);
 
             handleMessage(header,body);
             Server.getInstance().saveConfigs();
