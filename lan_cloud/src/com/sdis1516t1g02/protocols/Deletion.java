@@ -44,9 +44,11 @@ public class Deletion{
      */
     public static boolean deleteFileById(String fileId){
         BackupFile file = Server.getInstance().getChunckManager().getFiles().get(fileId);
+        if(file == null)
+            return false;
         file.setAsDeleted();
         Server.getInstance().getMc().sendDeletedMessage(fileId);
-        //Server.getInstance().getChunckManager().getStoredChunks().remove(fileId);
+        Server.getInstance().saveConfigs();
         return true;
     }
 }

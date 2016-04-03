@@ -110,7 +110,7 @@ public class Backup{
         BackupFile backupFile = new BackupFile(fileId,true);
         cm.getFiles().put(fileId,backupFile);
 
-
+        Server.getInstance().saveConfigs();
         return sendBackupFile(replicationDegree, backupFile, file);
     }
 

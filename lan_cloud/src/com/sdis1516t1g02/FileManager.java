@@ -160,7 +160,6 @@ public class FileManager implements Serializable {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] digestedMessage = digest.digest(metadata.getBytes(StandardCharsets.UTF_8));
             String fileId = bytesToHex(digestedMessage);
-            System.out.println("FileId: "+fileId);
             return fileId;
         } catch (IOException e) {
             e.printStackTrace();
