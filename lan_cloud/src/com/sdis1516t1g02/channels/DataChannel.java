@@ -11,9 +11,20 @@ import java.net.MulticastSocket;
  * Created by Duarte on 19/03/2016.
  */
 public abstract class DataChannel extends Channel {
+
+    /**
+     * Creates a new DataChannel.
+     * @param multicastAddress the address the multicast socket will join
+     * @param mport the port used to create the socket
+     * @throws IOException
+     */
     public DataChannel(InetAddress multicastAddress, int mport) throws IOException {
         super(multicastAddress,mport);
     }
+
+    /**
+     * The thread for the DataChannel, that will be inherited by the Restore and Backup Channel.
+     */
     @Override
     public void run() {
 
@@ -41,6 +52,13 @@ public abstract class DataChannel extends Channel {
         }
     }
 
+    /**
+     * Sends a message to the multicast socket.
+     * @param message the message to be sent
+     * @return the length of the message that was sent
+     * @throws ChannelException
+     * @throws IOException
+     */
     protected int sendMessage(byte[] message) throws ChannelException, IOException {
         if (message.length > Server.DATA_BUF_SIZE)
             throw new ChannelException("Message Size bigger than "+Server.DATA_BUF_SIZE+" bytes.");

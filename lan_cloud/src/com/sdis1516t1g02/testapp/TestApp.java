@@ -7,6 +7,10 @@ import java.rmi.registry.Registry;
 
 public class TestApp {
 
+    /**
+     * Initiates the TestApp.
+     * @param args the arguments passed by the user
+     */
     public static void main(String[] args) {
         try {
             if (args.length < 3 || args.length > 4 || (args.length > 3 && (!args[1].equals("BACKUP") && !args[1].equals("BACKUPENH"))) ) {
