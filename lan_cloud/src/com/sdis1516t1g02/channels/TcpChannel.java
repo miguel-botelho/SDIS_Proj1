@@ -3,12 +3,12 @@ package com.sdis1516t1g02.channels;
 import com.sdis1516t1g02.Server;
 import com.sdis1516t1g02.protocols.MessageType;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.Observable;
 
 import static com.sdis1516t1g02.channels.Channel.*;
@@ -32,10 +32,23 @@ public class TcpChannel extends Observable implements Runnable {
         }
     }
 
+
+
     protected void handleEstablishedSocketConnection(Socket socket) throws ChannelException {
         try {
-            byte[] data = new byte[Server.DATA_BUF_SIZE];
-            int bytesRead = socket.getInputStream().read(data);
+            ByteBuffer bf = ByteBuffer.allocate(Server.DATA_BUF_SIZE);
+            BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
+            int bytesRead = 0;
+            while (true) {
+                int b = in.read();
+                if (b == -1) {
+                    break;
+                }
+                bytesRead += b;
+                bf.put( (byte) b);
+            }
+            socket.close();
+            byte[] data = bf.array();
             String header = getHeader(data);
             byte[] body = getBody(data, bytesRead);
 
