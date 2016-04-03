@@ -16,10 +16,19 @@ import java.net.InetAddress;
  */
 public class Control extends Channel {
 
+    /**
+     * Creates a new Control channel.
+     * @param multicastAddress the address the multicast socket will join
+     * @param mport the port used to create the socket
+     * @throws IOException
+     */
     public Control(InetAddress multicastAddress, int mport) throws IOException {
         super(multicastAddress, mport);
     }
 
+    /**
+     * The thread for the Control Channel. It's constantly running and receiving messages.
+     */
     @Override
     public void run() {
 
@@ -49,6 +58,12 @@ public class Control extends Channel {
     }
 
     //TODO resolver questão de onde devem ser resolvidas as excepções de mandar mensagens
+
+    /**
+     * Sends a REMOVED message.
+     * @param fileId the id of the file that was deleted
+     * @param chunkNo the number of the chunk that was deleted
+     */
     public void sendRemovedMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.REMOVED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
@@ -61,6 +76,11 @@ public class Control extends Channel {
         }
     }
 
+    /**
+     * Sends a STORED message.
+     * @param fileId the id of the file that was stored.
+     * @param chunkNo the number of the chunk that was stored.
+     */
     public void sendStoredMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.STORED.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
@@ -73,6 +93,10 @@ public class Control extends Channel {
         }
     }
 
+    /**
+     * Sends a DELETE message.
+     * @param fileId the id of the file to be deleted.
+     */
     public void sendDeletedMessage(String fileId){
         String header= buildHeader(MessageType.DELETE.toString(), Server.VERSION, Server.getInstance().getId(),fileId);
         try {
@@ -85,6 +109,11 @@ public class Control extends Channel {
         }
     }
 
+    /**
+     * Sends a GETCHUNK message
+     * @param fileId the id of the file to be retrieved
+     * @param chunkNo the number of the chunk to be retrieved
+     */
     public void sendGetChunkMessage(String fileId, int chunkNo){
         String header= buildHeader(MessageType.GETCHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,""+chunkNo);
         try {
@@ -96,6 +125,13 @@ public class Control extends Channel {
         }
     }
 
+    /**
+     * It handles a message received by the Control channel. Splits the header to retrieve all of the information.
+     * It then calls either the deleteChunk (for the DELETED message), updateNetworkCopiesOfChunk (for the REMOVED message) and sendRequestedChunk (for the GETCHUNK message)
+     * @param header the header of the received message
+     * @param body the body of the received message
+     * @throws MessageException
+     */
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");

@@ -11,10 +11,22 @@ import java.net.InetAddress;
  */
 public class DataRestore extends DataChannel {
 
+    /**
+     * Creates a new DataRestore channel.
+     * @param multicastAddress the address the multicast socket will join
+     * @param mport the port used to create the socket
+     * @throws IOException
+     */
     public DataRestore(InetAddress multicastAddress, int mport) throws IOException {
         super(multicastAddress, mport);
     }
 
+    /**
+     * Sends a CHUNK message.
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param data the body of the message (the chunk)
+     */
     public void sendChunkMessage(String fileId,int chunkNo,byte data[]){
         String header = buildHeader(MessageType.CHUNK.toString(), Server.VERSION, Server.getInstance().getId(),fileId,chunkNo+"");
         byte[] message = buildMessage(header, data);
@@ -29,6 +41,12 @@ public class DataRestore extends DataChannel {
         }
     }
 
+    /**
+     * Splits the received header to retrieve all of the information. It then notifies the observers that a CHUNK message was received.
+     * @param header the header of the message
+     * @param body the body of the message
+     * @throws MessageException
+     */
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");

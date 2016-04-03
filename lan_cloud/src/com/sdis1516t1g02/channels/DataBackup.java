@@ -12,14 +12,38 @@ import java.net.InetAddress;
  * Created by Duarte on 19/03/2016.
  */
 public class DataBackup extends DataChannel{
+
+    /**
+     * Creates a new DataBackup channel.
+     * @param multicastAddress the address the multicast socket will join
+     * @param mport the port used to create the socket
+     * @throws IOException
+     */
     public DataBackup(InetAddress multicastAddress, int mport) throws IOException {
         super(multicastAddress, mport);
     }
 
+    /**
+     * Calls the other sendBackupMessage
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param replicationDegree the replication degree of the file
+     * @param data the body of the message
+     * @return sendBackupMessage
+     */
     public int sendBackupMessage(String fileId, int chunkNo, int replicationDegree, byte[] data){
         return sendBackupMessage(Server.getInstance().getId(),fileId,chunkNo,replicationDegree,data);
     }
 
+    /**
+     * Builds a message and calls sendMessage with it.
+     * @param senderId the id of the peer that sent the message
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param replicationDegree the replication degree of the file
+     * @param data the body (the chunk)
+     * @return the size of the whole message
+     */
     public int sendBackupMessage(String senderId,String fileId, int chunkNo, int replicationDegree, byte[] data){
         String header = buildHeader(MessageType.PUTCHUNK.toString(), Server.VERSION, senderId,fileId, ""+chunkNo, ""+replicationDegree);
 
@@ -37,6 +61,13 @@ public class DataBackup extends DataChannel{
         return size;
     }
 
+    /**
+     * It handles a message received by the DataBackup channel. Splits the header to retrieve all of the information.
+     * It then calls either the receiveChunk (for the PUTCHUNK message)
+     * @param header the header of the message
+     * @param body the body of the message
+     * @throws MessageException
+     */
     @Override
     protected void handleMessage(String header, byte[] body) throws MessageException {
         String splitHeader[]=header.split("\\s+");

@@ -12,9 +12,20 @@ import java.io.File;
  */
 public class LoggerServer {
 
+    /**
+     * The logger.
+     */
     Logger logger = Logger.getLogger("MyLog");
+
+    /**
+     * The file handler.
+     */
     FileHandler fh;
 
+    /**
+     * Creates a new Logger Server.
+     * @param file the name of the file
+     */
     public LoggerServer(String file) {
         try {
         	File f = new File(file);
@@ -36,6 +47,12 @@ public class LoggerServer {
         }
     }
 
+    /**
+     * It writes into the logger.
+     * @param obj the class that called the update logger
+     * @param type the type of the message (sent or received)
+     * @param msg the message to be written
+     */
     public void updateLogger(Object obj, Boolean type, String msg) {
 
         if (type) { //se type == true, entao é sent

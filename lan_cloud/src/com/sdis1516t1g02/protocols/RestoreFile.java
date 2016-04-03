@@ -23,28 +23,74 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Duarte on 28/03/2016.
  */
 public class RestoreFile implements Observer{
+
+    /**
+     * The name of the file.
+     */
     String filename;
+
+    /**
+     * The id of the file.
+     */
     String fileId;
+
+    /**
+     * The file.
+     */
     File file;
+
+    /**
+     * The size of the file.
+     */
     long fileSize;
+
+    /**
+     * The lock on the file.
+     */
     private final Object fileLock = new Object();
+
+    /**
+     * The received chunks.
+     */
     ArrayList<Boolean> receivedChunks;
+
+    /**
+     * The locks on the chunks.
+     */
     ArrayList<Object> locks;
 
+    /**
+     * The lock.
+     */
     final Lock lock = new ReentrantLock();
+
+    /**
+     * The condition for not being full.
+     */
     final Condition notFull  = lock.newCondition();
 
+    /**
+     * Creates a new RestoreFile.
+     * @param filename the name of the file
+     */
     public RestoreFile(String filename){
         this.filename = filename;
         generateFields();
     }
 
+    /**
+     * Generates all of the fields of the class.
+     */
     public void generateFields(){
         this.fileId = Server.getInstance().getFileManager().getFileId(filename);
         this.file = new File(filename);
         this.fileSize = file.length();
     }
 
+    /**
+     * Restores a whole file and requests the chunks that are on the network and adds an observer.
+     * @return true if restored, false if it didn't
+     */
     public boolean restore(){
         ChunkManager cm = Server.getInstance().getChunckManager();
         FileManager fm = Server.getInstance().getFileManager();
@@ -92,6 +138,10 @@ public class RestoreFile implements Observer{
         return true;
     }
 
+    /**
+     * Checks if it has received all of the chunks of the file.
+     * @return true if it received, false if it didn't
+     */
     protected synchronized boolean hasReceivedAllChunks(){
         for(Boolean bool : receivedChunks){
             if(bool.equals(Boolean.FALSE))
@@ -100,6 +150,11 @@ public class RestoreFile implements Observer{
         return true;
     }
 
+    /**
+     * Writes a chunk into the file.
+     * @param chunkNo the number of the chunk
+     * @param data the data of the chunk
+     */
     protected void writeChunk(int chunkNo, byte[] data){
         synchronized (fileLock){
             long position = chunkNo*Server.CHUNK_SIZE;
@@ -114,11 +169,20 @@ public class RestoreFile implements Observer{
         }
     }
 
+    /**
+     * Initializes all of the ArrayLists.
+     * @param numChunks the number of chunks
+     */
     private void initLists(int numChunks) {
         receivedChunks = new ArrayList<>(Collections.nCopies(10,Boolean.FALSE));
         locks = new ArrayList<>(Collections.nCopies(10,new Object()));
     }
 
+    /**
+     *
+     * @param o
+     * @param arg
+     */
     @Override
     public void update(Observable o, Object arg) {
         MessageData messageData = (MessageData) arg;
