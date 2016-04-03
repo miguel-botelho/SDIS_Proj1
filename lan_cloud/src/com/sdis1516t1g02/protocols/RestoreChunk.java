@@ -91,6 +91,7 @@ public class RestoreChunk implements Observer {
                 String addressStr = this.args[ADDRESS_INDEX];
                 InetAddress address = InetAddress.getByName(addressStr);
                 int port = Integer.valueOf(this.args[PORT_INDEX]);
+
                 byte[] data = cm.getChunkData(fileId,chunkNo);
                 int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);
                 Thread.sleep(delay);

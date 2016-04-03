@@ -122,11 +122,6 @@ public class TcpChannel extends Observable implements Runnable {
 
     @Override
     public void run() {
-        try {
-            serverSocket.setReceiveBufferSize(Server.DATA_BUF_SIZE);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
         while(true){
             try {
                 final Socket socket = getServerSocket().accept();
