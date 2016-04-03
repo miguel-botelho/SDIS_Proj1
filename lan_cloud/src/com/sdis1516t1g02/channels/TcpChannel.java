@@ -23,7 +23,7 @@ public class TcpChannel extends Observable implements Runnable {
 
     public TcpChannel() {
         try {
-            this.setServerSocket(new ServerSocket());
+            this.setServerSocket(new ServerSocket(0));
             this.setPort(getServerSocket().getLocalPort());
         } catch (IOException e) {
             this.setServerSocket(null);
@@ -122,10 +122,14 @@ public class TcpChannel extends Observable implements Runnable {
 
     @Override
     public void run() {
-        Socket socket;
+        try {
+            serverSocket.setReceiveBufferSize(Server.DATA_BUF_SIZE);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
         while(true){
             try {
-                socket = getServerSocket().accept();
+                Socket socket = getServerSocket().accept();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
