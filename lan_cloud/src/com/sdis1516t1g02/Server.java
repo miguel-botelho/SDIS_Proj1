@@ -33,7 +33,7 @@ public class Server {
     public final static int MDR_PORT = 4448;
     public final static Charset CHARSET= StandardCharsets.US_ASCII;
 
-    public static String VERSION = "1.0";
+    public static String VERSION = "1.3";
     public final static String MAX_VERSION = "1.3";
 
     private static Server ourInstance;
@@ -245,6 +245,8 @@ public class Server {
     public static void setEnhanceMode(boolean enhancement){
         if(enhancement){
             VERSION = MAX_VERSION;
+        }else{
+            VERSION = "1.0";
         }
     }
 }

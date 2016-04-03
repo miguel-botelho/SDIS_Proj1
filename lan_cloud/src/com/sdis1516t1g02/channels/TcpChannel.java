@@ -60,7 +60,7 @@ public class TcpChannel extends Observable implements Runnable {
             return;
         if(!isValidVersionNumber(version))
             throw new MessageException(header, MessageException.ExceptionType.VERSION_INVALID);
-        System.out.println("Received message: "+header+" Body: "+body.length);
+        System.out.println("Received TCP message: "+header+" Body: "+body.length);
         switch (MessageType.valueOf(messageType)){
             case CHUNK:
                 int expectedLength = 5;
@@ -122,6 +122,11 @@ public class TcpChannel extends Observable implements Runnable {
 
     @Override
     public void run() {
+        try {
+            serverSocket.setReceiveBufferSize(Server.DATA_BUF_SIZE);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
         while(true){
             try {
                 final Socket socket = getServerSocket().accept();
