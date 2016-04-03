@@ -48,7 +48,7 @@ public class TestApp {
                     response = rmiInterface.backup(filename, Integer.parseInt(repDegree), true);
                     System.out.println(response);
                     break;
-                case "RESOTREENH":
+                case "RESTOREENH":
                     response = rmiInterface.restore(filename, true);
                     System.out.println(response);
                     break;

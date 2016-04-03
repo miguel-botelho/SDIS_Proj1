@@ -3,6 +3,7 @@ package com.sdis1516t1g02;
 import com.sdis1516t1g02.channels.Control;
 import com.sdis1516t1g02.channels.DataBackup;
 import com.sdis1516t1g02.channels.DataRestore;
+import com.sdis1516t1g02.channels.TcpChannel;
 import com.sdis1516t1g02.chunks.ChunkManager;
 import com.sdis1516t1g02.testapp.InterfaceListener;
 
@@ -32,7 +33,8 @@ public class Server {
     public final static int MDR_PORT = 4448;
     public final static Charset CHARSET= StandardCharsets.US_ASCII;
 
-    public final static String VERSION = "1.0";
+    public static String VERSION = "1.0";
+    public final static String MAX_VERSION = "1.3";
 
     private static Server ourInstance;
     private final ChunkManager chunckManager = new ChunkManager();
