@@ -32,10 +32,12 @@ public class TcpChannel extends Observable implements Runnable {
         }
     }
 
-    protected void handleReceivedPacket(Socket socket) throws ChannelException {
+    protected void handleEstablishedSocketConnection(Socket socket) throws ChannelException {
         try {
-            byte[] data = new byte[socket.getReceiveBufferSize()];
-            socket.getInputStream().read(data);
+            byte[] tempData = new byte[Server.DATA_BUF_SIZE];
+            int bytesRead = socket.getInputStream().read(tempData);
+            byte[] data = new byte[bytesRead];
+            System.arraycopy(tempData,0,data,0,bytesRead);
             String header = getHeader(data);
             byte[] body = getBody(data, socket.getReceiveBufferSize());
 
@@ -129,7 +131,7 @@ public class TcpChannel extends Observable implements Runnable {
                     @Override
                     public void run() {
                         try {
-                            handleReceivedPacket(socket);
+                            handleEstablishedSocketConnection(socket);
                         } catch (ChannelException e) {
                             e.printStackTrace();
                         }
