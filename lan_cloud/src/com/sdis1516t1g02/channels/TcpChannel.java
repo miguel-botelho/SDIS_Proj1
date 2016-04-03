@@ -34,10 +34,7 @@ public class TcpChannel extends Observable implements Runnable {
 
     protected void handleEstablishedSocketConnection(Socket socket) throws ChannelException {
         try {
-            byte[] tempData = new byte[Server.DATA_BUF_SIZE];
-            int bytesRead = socket.getInputStream().read(tempData);
-            byte[] data = new byte[bytesRead];
-            System.arraycopy(tempData,0,data,0,bytesRead);
+            byte[] data = new byte[Server.DATA_BUF_SIZE];
             String header = getHeader(data);
             byte[] body = getBody(data, bytesRead);
 
