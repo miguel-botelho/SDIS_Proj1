@@ -73,10 +73,12 @@ public class Server {
         this.setMc(new Control(InetAddress.getByName(MC_ADDRESS),MC_PORT));
 		this.setMdb(new DataBackup(InetAddress.getByName(MDB_ADDRESS), MDB_PORT));
         this.setMdr(new DataRestore(InetAddress.getByName(MDR_ADDRESS), MDR_PORT));
+        this.setTcpChannel(new TcpChannel());
 
 		new Thread(this.mc).start();
         new Thread(this.mdb).start();
        	new Thread(this.mdr).start();
+        this.setTcpChannel(new TcpChannel());
         new Thread(this.interfaceListener).start();
     }
 
@@ -90,11 +92,13 @@ public class Server {
         this.setMc(new Control(InetAddress.getByName(mcAddress),mcPort));
         this.setMdb(new DataBackup(InetAddress.getByName(mdbAddress), mdbPort));
         this.setMdr(new DataRestore(InetAddress.getByName(mdrAddress), mdrPort));
+        this.setTcpChannel(new TcpChannel());
         this.setInterfaceListener(new InterfaceListener(serverId));
 
         new Thread(this.mc).start();
         new Thread(this.mdb).start();
         new Thread(this.mdr).start();
+        new Thread(this.tcpChannel).start();
         new Thread(this.interfaceListener).start();
         ourInstance = this;
     }
