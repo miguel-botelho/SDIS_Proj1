@@ -1,6 +1,7 @@
 package com.sdis1516t1g02.protocols;
 
 import com.sdis1516t1g02.Server;
+import com.sdis1516t1g02.channels.MessageData;
 import com.sdis1516t1g02.chunks.ChunkException;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
@@ -12,19 +13,60 @@ import java.util.Random;
  * Created by Duarte on 28/03/2016.
  */
 public class RestoreChunk implements Observer {
+    /**
+     * Max delay to send the message, in milliseconds.
+     */
     public static final int RETRIEVE_CHUNK_MAX_DELAY = 400; /*IN MILLISECONDS*/
 
+    /**
+     * The type of the message.
+     */
     private final MessageType messageType;
+
+    /**
+     * The version of the message.
+     */
     private final double version;
+
+    /**
+     * The id of the peer that sent the message.
+     */
     private final String serverId;
+
+    /**
+     * The id of the file.
+     */
     private final String fileId;
+
+    /**
+     * The number of the chunk.
+     */
     private final int chunkNo;
+
+    /**
+     * Args.
+     */
     private final String[] args;
 
+    /**
+     * A boolean to check if the chunk was already sent.
+     */
     private Boolean alreadySent = false;
+
+    /**
+     * A lock on the sent.
+     */
     private final Object alreadySentLock = new Object();
 
-
+    /**
+     * Creates a new Restore Chunk.
+     * @param messageType the type of the message
+     * @param version the version of the message
+     * @param serverId the id of the peer that sent the message
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param args
+     */
     public RestoreChunk(MessageType messageType, double version, String serverId, String fileId, int chunkNo, String[] args){
         this.messageType = messageType;
         this.version = version;
@@ -34,6 +76,9 @@ public class RestoreChunk implements Observer {
         this.args = args;
     }
 
+    /**
+     * Sends a Chunk that was requested.
+     */
     public void sendRequestedChunk(){
         Server.getInstance().getMdr().addObserver(this);
         ChunkManager cm = Server.getInstance().getChunckManager();
@@ -55,12 +100,19 @@ public class RestoreChunk implements Observer {
         }
     }
 
+    /**
+     *
+     * @param o
+     * @param arg
+     */
     @Override
     public void update(Observable o, Object arg) {
-        String[] messageInfo = (String[]) arg;
-        MessageType messageType = MessageType.valueOf(messageInfo[0]);
-        int chunkNo = Integer.valueOf(messageInfo[1]);
-        if(messageType.equals(MessageType.CHUNK) && messageInfo[1].equals(fileId) &&  chunkNo == this.chunkNo){
+        MessageData messageData = (MessageData) arg;
+        MessageType messageType = messageData.getMessageType();
+        String fileId = messageData.getFileId();
+        int chunkNo = messageData.getChunkNo();
+
+        if(messageType.equals(MessageType.CHUNK) && fileId.equals(fileId) &&  chunkNo == this.chunkNo){
             synchronized (alreadySentLock){
                 alreadySent = true;
             }

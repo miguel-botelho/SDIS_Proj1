@@ -18,6 +18,11 @@ import static com.sdis1516t1g02.protocols.MessageType.STORED;
  */
 public class Reclaim {
 
+    /**
+     * Reclaims space for the peer. It tries to delete chunks by checking their replication degree.
+     * @param space the space in bytes
+     * @return the bytes freed
+     */
     public static long reclaimSpace(long space){
         ChunkManager cm = Server.getInstance().getChunckManager();
         ArrayList<Chunk> chunks = cm.getStoredChunks();
@@ -30,7 +35,7 @@ public class Reclaim {
 
         long reclaimedSpace = 0;
         int i = 0;
-        while(reclaimedSpace < space || i < chunks.size()){
+        while(reclaimedSpace < space && i < chunks.size()){
             Chunk chunk = chunks.get(i);
             byte[] data = null;
             boolean needsReSendChunk = (chunk.getNumNetworkCopies()-chunk.getReplicationDegree())<=0;
@@ -62,6 +67,15 @@ public class Reclaim {
         return reclaimedSpace;
     }
 
+    /**
+     * Adds a network copy if the message is STORED, removes if is REMOVED.
+     * @param messageType the type of the message
+     * @param version the version of the message
+     * @param senderId the id of the peer that sent the message
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param args
+     */
     public static void updateNetworkCopiesOfChunk(MessageType messageType, double version, String senderId, String fileId, int chunkNo, String[] args){
         ChunkManager cm = Server.getInstance().getChunckManager();
         Chunk chunk = cm.getChunk(fileId,chunkNo);

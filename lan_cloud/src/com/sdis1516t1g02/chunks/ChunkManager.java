@@ -13,22 +13,54 @@ import java.util.Set;
  * Created by Duarte on 21/03/2016.
  */
 public class ChunkManager implements Serializable {
+
+    /**
+     * The folder where the chunks are stored.
+     */
     public final static String FOLDER_PATH = "chuncks/";
+
+    /**
+     * The extension of the chunks.
+     */
     public final static String CHUNK_EXTENSION=".chunck";
 
+    /**
+     * An hashtable that contains the backup files.
+     */
     Hashtable<String,BackupFile> files;
 
+    /**
+     * The serializable file.
+     */
     private final File file = new File("conf/filesChunk.ser");
 
+    /**
+     * Creates a new ChunkManager.
+     */
     public ChunkManager(){
         files = new Hashtable<>();
     }
 
-
+    /**
+     * Creates a new name for the chunk.
+     * @param fileId the id of the file.
+     * @param chunkNo the number of the chunk.
+     * @return the name of the chunk
+     */
     public static String generateFilename(String fileId, int chunkNo){
         return fileId+"_"+chunkNo;
     }
 
+    /**
+     * Adds a chunk to the peer.
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param replicationDegree the replication degree of the file
+     * @param data the chunk data
+     * @param originalServerId the id of the peer that sent the chunk
+     * @return true if it added the chunk, false if didn't
+     * @throws ChunkException
+     */
     public boolean addChunk(String fileId, int chunkNo, int replicationDegree, byte[] data, String originalServerId) throws ChunkException {
         if(!Server.getInstance().hasSpaceForChunk(data.length))
             throw new ChunkException("Not enough space for a new chunk. Available space: "+Server.getByteCount(Server.getInstance().getAvailableSpace(),true));
@@ -43,6 +75,13 @@ public class ChunkManager implements Serializable {
         return writeChunk(data, chunk);
     }
 
+    /**
+     * Returns the chunk data.
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @return chunk data
+     * @throws ChunkException
+     */
     public byte[] getChunkData(String fileId, int chunkNo) throws ChunkException {
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
@@ -54,6 +93,11 @@ public class ChunkManager implements Serializable {
         return readChunk(chunk);
     }
 
+    /**
+     * Deletes a file from the system.
+     * @param fileId the id of the file
+     * @return deleted space
+     */
     public long deleteFile(String fileId){
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null || backupFile.deleted){
@@ -73,6 +117,16 @@ public class ChunkManager implements Serializable {
         return deletedSpace;
     }
 
+    /**
+     * Returns the chunk that isn't stored.
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @param replicationDegree the replication degree of the file
+     * @param backupFile the backup file
+     * @param originalServerId the id of the peer that sent the chunk
+     * @return the chunk
+     * @throws ChunkException
+     */
     protected Chunk getNotStoredChunk(String fileId, int chunkNo, int replicationDegree, BackupFile backupFile, String originalServerId) throws ChunkException {
         Chunk chunk;
         chunk = backupFile.chunks.get(new Integer(chunkNo));
@@ -90,6 +144,13 @@ public class ChunkManager implements Serializable {
         return chunk;
     }
 
+    /**
+     * Writes a chunk in the system.
+     * @param data the data of the chunk
+     * @param chunk the chunk
+     * @return true if it wrote, false if it didn't
+     * @throws ChunkException
+     */
     protected boolean writeChunk(byte[] data, Chunk chunk) throws ChunkException {
         File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName +CHUNK_EXTENSION);
         if(!Server.getInstance().allocateSpace(data.length))
@@ -123,6 +184,12 @@ public class ChunkManager implements Serializable {
         return false;
     }
 
+    /**
+     * Reads a chunk from the system.
+     * @param chunk the chunk
+     * @return data chunk
+     * @throws ChunkException
+     */
     protected byte[] readChunk(Chunk chunk) throws ChunkException {
         String path = FOLDER_PATH+chunk.chunkFileName +CHUNK_EXTENSION;
         File chunkFile = new File(path);
@@ -147,7 +214,11 @@ public class ChunkManager implements Serializable {
         throw new ChunkException("Unknown error reading from file!");
     }
 
-
+    /**
+     * Deletes a chunk from the system.
+     * @param chunk the chunk
+     * @return the size of the chunk
+     */
     public long deleteChunk(Chunk chunk) {
         Path path = Paths.get(FOLDER_PATH,chunk.chunkFileName+CHUNK_EXTENSION);
         File chunkFile = new File(FOLDER_PATH+chunk.chunkFileName+CHUNK_EXTENSION);
@@ -159,6 +230,7 @@ public class ChunkManager implements Serializable {
                     Files.delete(path);
                     Server.getInstance().freeSpace(size);
                     chunk.setState(Chunk.State.DELETED);
+                    break;
                 } catch (NoSuchFileException x) {
                     System.err.format("%s: no such" + " file or directory%n", path);
                     throw x;
@@ -178,8 +250,6 @@ public class ChunkManager implements Serializable {
                 }
                 continue;
             }
-
-            break;
         }
         if (i >= 5)
             return -1;
@@ -187,10 +257,20 @@ public class ChunkManager implements Serializable {
         return size;
     }
 
+    /**
+     * Return the hashtable that contains the backup files
+     * @return files
+     */
     public Hashtable<String, BackupFile> getFiles() {
         return files;
     }
 
+    /**
+     * Returns a chunk from the hashtable, given the id of the file and the number of the chunk.
+     * @param fileId the id of the file
+     * @param chunkNo the number of the chunk
+     * @return chunk
+     */
     public Chunk getChunk(String fileId, int chunkNo){
         BackupFile backupFile = files.get(fileId);
         if(backupFile == null){
@@ -199,6 +279,10 @@ public class ChunkManager implements Serializable {
         return backupFile.chunks.get(chunkNo);
     }
 
+    /**
+     * Returns all of the chunks that have the state set to STORED.
+     * @return the chunks
+     */
     public ArrayList<Chunk> getStoredChunks(){
         ArrayList<Chunk> chunksList = new ArrayList<>();
         Set<String> keys = files.keySet();
@@ -206,10 +290,12 @@ public class ChunkManager implements Serializable {
         for(String key : keys){
             chunksList.addAll(files.get(key).getStoredChunks());
         }
-
         return chunksList;
     }
 
+    /**
+     * Serialize the files hashtable.
+     */
     public void serialize() {
         try {
             FileOutputStream fileOut = null;
@@ -235,15 +321,18 @@ public class ChunkManager implements Serializable {
         }
     }
 
+    /**
+     * Deserialize the files hashtable.
+     */
     public void deserialize() {
         try {
-
-
             FileInputStream fileIn = new FileInputStream(file);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             files = (Hashtable<String,BackupFile>) in.readObject();
             in.close();
             fileIn.close();
+        }catch(FileNotFoundException e){
+            return;
         }catch(IOException i) {
             i.printStackTrace();
             return;
