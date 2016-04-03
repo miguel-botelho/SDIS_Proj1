@@ -129,7 +129,7 @@ public class TcpChannel extends Observable implements Runnable {
         }
         while(true){
             try {
-                Socket socket = getServerSocket().accept();
+                final Socket socket = getServerSocket().accept();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
