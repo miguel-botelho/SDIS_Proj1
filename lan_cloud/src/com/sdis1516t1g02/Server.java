@@ -33,7 +33,7 @@ public class Server {
     public final static int MDR_PORT = 4448;
     public final static Charset CHARSET= StandardCharsets.US_ASCII;
 
-    public static String VERSION = "1.3";
+    public static String VERSION = "1.0";
     public final static String MAX_VERSION = "1.3";
 
     private static Server ourInstance;
