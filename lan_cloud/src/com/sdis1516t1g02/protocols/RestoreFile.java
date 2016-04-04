@@ -52,12 +52,12 @@ public class RestoreFile implements Observer{
     /**
      * The received chunks.
      */
-    ArrayList<Boolean> receivedChunks;
+    final ArrayList<Boolean> receivedChunks = new ArrayList<>();
 
     /**
      * The locks on the chunks.
      */
-    ArrayList<Object> locks;
+    final ArrayList<Object> locks = new ArrayList<>();
 
     /**
      * The lock.
@@ -115,22 +115,32 @@ public class RestoreFile implements Observer{
 
         try {
             Server.getInstance().getMdr().addObserver(this);
+            if(Server.getVERSION() >=1.3){
+                Server.getInstance().getTcpChannel().addObserver(this);
+            }
 
             for (int i = 0; i < numChunks; i++) {
                 System.out.println("Requesting chunkNo: "+i);
                 mc.sendGetChunkMessage(fileId,i);
             }
+
+
+            int i = 0;
             lock.lock();
             try {
-                for (int i = 0; i < 2*numChunks; i++) {
+                for (i = 0; i < 2*numChunks; i++) {
                     if(!hasReceivedAllChunks())
                         notFull.await(1, TimeUnit.SECONDS);
+                    else{
+                        break;
+                    }
                 }
 
             }finally {
                 lock.unlock();
             }
-
+            if(!hasReceivedAllChunks())
+                return false;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -142,12 +152,20 @@ public class RestoreFile implements Observer{
      * Checks if it has received all of the chunks of the file.
      * @return true if it received, false if it didn't
      */
-    protected synchronized boolean hasReceivedAllChunks(){
+    protected boolean hasReceivedAllChunks(){
         for(Boolean bool : receivedChunks){
             if(bool.equals(Boolean.FALSE))
                 return false;
         }
         return true;
+    }
+
+    protected void setChunkAsReceived(int chunkNo){
+        receivedChunks.set(chunkNo,Boolean.TRUE);
+    }
+
+    protected boolean isChunkReceived(int chunkNo){
+        return this.receivedChunks.get(chunkNo);
     }
 
     /**
@@ -174,8 +192,8 @@ public class RestoreFile implements Observer{
      * @param numChunks the number of chunks
      */
     private void initLists(int numChunks) {
-        receivedChunks = new ArrayList<>(Collections.nCopies(10,Boolean.FALSE));
-        locks = new ArrayList<>(Collections.nCopies(10,new Object()));
+        receivedChunks.addAll(Collections.nCopies(numChunks,Boolean.FALSE));
+        locks.addAll(Collections.nCopies(numChunks,new Object()));
     }
 
     /**
@@ -193,24 +211,31 @@ public class RestoreFile implements Observer{
         int chunkNo = messageData.getChunkNo();
         byte[] data = messageData.getBody();
 
+        if(version >= 1.3){
+            if(data.length > 0){
+                handleReceivedChunk(fileId,chunkNo,data);
+            }
+        }else if(version >= 1.0){
+            handleReceivedChunk(fileId, chunkNo, data);
+        }
+    }
 
-        if(version >= 1.0){
-            if(fileId.equals(this.fileId)) {
-                synchronized (this.locks.get(chunkNo)){
-                    if(this.receivedChunks.get(chunkNo))
-                        return;
-                    writeChunk(chunkNo,data);
-                    this.receivedChunks.set(chunkNo,Boolean.TRUE);
-                }
+    private void handleReceivedChunk(String fileId, int chunkNo, byte[] data) {
+        if(fileId.equals(this.fileId)) {
+            synchronized (this.locks.get(chunkNo)){
+                if(isChunkReceived(chunkNo))
+                    return;
+                writeChunk(chunkNo,data);
+                setChunkAsReceived(chunkNo);
                 lock.lock();
                 try{
                     notFull.signal();
                 }finally {
                     lock.unlock();
                 }
-            }else{
-                return;
             }
+        }else{
+            return;
         }
     }
 }

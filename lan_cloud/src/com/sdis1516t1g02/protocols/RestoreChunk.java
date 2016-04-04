@@ -5,6 +5,8 @@ import com.sdis1516t1g02.channels.MessageData;
 import com.sdis1516t1g02.chunks.ChunkException;
 import com.sdis1516t1g02.chunks.ChunkManager;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
@@ -17,6 +19,8 @@ public class RestoreChunk implements Observer {
      * Max delay to send the message, in milliseconds.
      */
     public static final int RETRIEVE_CHUNK_MAX_DELAY = 400; /*IN MILLISECONDS*/
+    private static final int ADDRESS_INDEX = 0;
+    private static final int PORT_INDEX = 1;
 
     /**
      * The type of the message.
@@ -82,7 +86,30 @@ public class RestoreChunk implements Observer {
     public void sendRequestedChunk(){
         Server.getInstance().getMdr().addObserver(this);
         ChunkManager cm = Server.getInstance().getChunckManager();
-        if(version >= 1.0){
+        if(version >= 1.3){
+            try {
+                String addressStr = this.args[ADDRESS_INDEX];
+                InetAddress address = InetAddress.getByName(addressStr);
+                int port = Integer.valueOf(this.args[PORT_INDEX]);
+
+                byte[] data = cm.getChunkData(fileId,chunkNo);
+                int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);
+                Thread.sleep(delay);
+                synchronized (alreadySentLock){
+                    if(alreadySent)
+                        return;
+                }
+                Server.getInstance().getTcpChannel().sendChunkMessage(fileId,chunkNo,data,address,port);
+                byte[] emptyData = new byte[0];
+                Server.getInstance().getMdr().sendChunkMessage(fileId,chunkNo,emptyData);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }catch (ChunkException e) {
+                e.printStackTrace();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+        }else if(version >= 1.0){
             try {
                 byte[] data = cm.getChunkData(fileId,chunkNo);
                 int delay = new Random().nextInt(RETRIEVE_CHUNK_MAX_DELAY+1);
