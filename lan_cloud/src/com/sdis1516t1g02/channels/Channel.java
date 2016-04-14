@@ -1,15 +1,11 @@
 package com.sdis1516t1g02.channels;
 
 import com.sdis1516t1g02.Server;
-import com.sun.xml.internal.ws.server.sei.SEIInvokerTube;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Observable;
 
